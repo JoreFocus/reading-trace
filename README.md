@@ -44,33 +44,39 @@ npm test
 
 ## 换成自己的阅读材料
 
-复制 `data/walden.ts`，按照 `data/types.ts` 的结构填写：
+编辑 `data/reading.json` 即可，不需要修改页面代码。字段定义见
+`data/reading.schema.json`，保存后可以先运行：
 
-```ts
+```bash
+npm run validate:content
+```
+
+核心阅读位置结构：
+
+```json
 {
-  id: "unique-reading-id",
-  title: "文本标题",
-  summary: "全文在处理什么",
-  thesis: "这一遍阅读的核心张力",
-  groups: [
-    {
-      id: "section-id",
-      title: "章节标题",
-      items: [
-        {
-          id: "I-01",
-          role: "core",
-          quote: "原文",
-          context: "必要的上下文或结构说明",
-          prompt: "要求读者形成判断的问题"
-        }
-      ]
-    }
-  ]
+  "id": "I-01",
+  "role": "core",
+  "quote": "原文",
+  "context": "必要的上下文或结构说明",
+  "prompt": "要求读者形成判断的问题"
 }
 ```
 
-然后在 `app/page.tsx` 中更换数据导入。界面不要求固定使用某种阅读理论；`core / support / turn` 的显示名称可以在数据文件中自行配置。
+界面不要求固定使用某种阅读理论；`core / support / turn` 的显示名称可以在数据文件中自行配置。
+
+## 与 Codex / Claude Code 一起使用
+
+仓库内置了两层 Agent 支持：
+
+- 根目录 `AGENTS.md` 与 `CLAUDE.md`：告诉 Agent 如何理解项目、替换内容和守住原文边界；
+- `skills/build-reading-trace/`：可选的阅迹构建 Skill，适合反复把文章、直播文稿、伴读记录或个人复盘做成交互式阅迹。
+
+这里没有预设一份固定提示词。你可以用自己的方式向 Agent 描述目标；Agent 会从项目说明中读取内容契约与设计原则。
+
+方法上的完整说明见 [`docs/creating-with-agents.md`](docs/creating-with-agents.md)。
+
+直接在仓库里工作时不必安装 Skill，Codex 与 Claude Code 会先读取各自的项目入口。只有希望在支持 Skills 的 Agent 中反复调用这套流程时，才需要加载 `skills/build-reading-trace/`。
 
 ## 设计方法
 

@@ -37,19 +37,26 @@ test("server-renders the Reading Trace document shell", async () => {
 });
 
 test("keeps content separate from the visual renderer", async () => {
-  const [page, data, types, acknowledgements] = await Promise.all([
+  const [page, data, types, acknowledgements, agentGuide, skill] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../data/walden.ts", import.meta.url), "utf8"),
+    readFile(new URL("../data/reading.json", import.meta.url), "utf8"),
     readFile(new URL("../data/types.ts", import.meta.url), "utf8"),
     readFile(new URL("../ACKNOWLEDGEMENTS.md", import.meta.url), "utf8"),
+    readFile(new URL("../AGENTS.md", import.meta.url), "utf8"),
+    readFile(
+      new URL("../skills/build-reading-trace/SKILL.md", import.meta.url),
+      "utf8",
+    ),
   ]);
 
-  assert.match(page, /from "\.\.\/data\/walden"/);
+  assert.match(page, /from "\.\.\/data\/reading\.json"/);
   assert.match(page, /localStorage/);
   assert.match(page, /exportTrace/);
   assert.match(data, /Project Gutenberg/);
   assert.match(types, /ReadingDocument/);
   assert.match(types, /"core" \| "support" \| "turn"/);
   assert.match(acknowledgements, /ljg-read/);
+  assert.match(agentGuide, /原文.*系统判断.*读者判断/s);
+  assert.match(skill, /name: build-reading-trace/);
   assert.doesNotMatch(page, /ljg-card|wiki-token|飞书/);
 });

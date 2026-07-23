@@ -1,0 +1,143 @@
+{
+  "id": "walden-where-i-lived-v1",
+  "title": "Where I Lived, and What I Lived For",
+  "summary": "梭罗把“去森林生活”写成一次认知实验：拿走多余之物，看看生活本身还剩下什么。",
+  "thesis": "简化，不是少拥有；是少让细节替你活。",
+  "invitation": "以下不是摘要。它们是十二个可以让你停下来的位置。",
+  "source": {
+    "label": "Project Gutenberg · eBook #205",
+    "url": "https://www.gutenberg.org/ebooks/205",
+    "licenseNote": "The source page identifies this edition as public domain in the USA."
+  },
+  "roleLabels": {
+    "core": "核心",
+    "support": "支撑",
+    "turn": "转折"
+  },
+  "groups": [
+    {
+      "id": "arrival",
+      "index": "I",
+      "kicker": "Arrival / 抵达",
+      "shortTitle": "为什么去森林",
+      "title": "他不是逃离社会，而是逼近生活",
+      "description": "先把实验的动机说清：不是隐居姿态，而是拒绝在尚未生活之前就死去。",
+      "items": [
+        {
+          "id": "I-01",
+          "role": "core",
+          "quote": "I went to the woods because I wished to live deliberately, to front only the essential facts of life.",
+          "context": "“Deliberately”不是慢，而是每一步都知道自己为什么这样活。森林只是用来剥掉惯性的实验装置。",
+          "prompt": "你现在的生活里，哪件事其实从未被你主动选择？"
+        },
+        {
+          "id": "I-02",
+          "role": "core",
+          "quote": "I wanted to live deep and suck out all the marrow of life, to live so sturdily and Spartan-like as to put to rout all that was not life.",
+          "context": "他要的不是舒服，而是一种高强度的辨认：把“像生活的东西”和生活本身分开。",
+          "prompt": "如果拿走身份、消费和忙碌，你还会用什么证明自己正在生活？"
+        },
+        {
+          "id": "I-03",
+          "role": "turn",
+          "quote": "And not, when I came to die, discover that I had not lived.",
+          "context": "前面的浪漫在这里突然变成风险判断：最大的损失不是失败，而是从未真正参与过自己的生命。",
+          "prompt": "什么迹象会让未来的你判断：这一段时间其实没有活过？"
+        }
+      ]
+    },
+    {
+      "id": "simplify",
+      "index": "II",
+      "kicker": "Subtraction / 做减法",
+      "shortTitle": "细节如何接管生活",
+      "title": "生活被切碎之后，人会误以为那就是充实",
+      "description": "梭罗攻击的并非物品本身，而是那些让人无法再看见整体的细节。",
+      "items": [
+        {
+          "id": "II-01",
+          "role": "core",
+          "quote": "Our life is frittered away by detail. An honest man has hardly need to count more than his ten fingers.",
+          "context": "Fritter away 是一点点耗散。生活不是被一次重大失败夺走，而是被无数看似合理的小事领走。",
+          "prompt": "你的时间正在被哪一种“每次只拿走一点”的东西消耗？"
+        },
+        {
+          "id": "II-02",
+          "role": "core",
+          "quote": "Simplicity, simplicity, simplicity!",
+          "context": "连续三次不是风格装饰，而是操作指令：每当系统复杂到看不清因果，就继续删。",
+          "prompt": "如果只能保留三个正在进行的项目，你会留下什么？"
+        },
+        {
+          "id": "II-03",
+          "role": "support",
+          "quote": "Instead of three meals a day, if it be necessary eat but one; instead of a hundred dishes, five.",
+          "context": "例子有十九世纪生活的痕迹，但判断仍有效：数量增加，会悄悄变成维护数量的义务。",
+          "prompt": "你拥有的什么东西，已经反过来要求你不断供养它？"
+        }
+      ]
+    },
+    {
+      "id": "speed",
+      "index": "III",
+      "kicker": "Velocity / 速度",
+      "shortTitle": "谁在制造匆忙",
+      "title": "工具节省了时间，却也可能规定时间该怎样使用",
+      "description": "梭罗把铁路和新闻当作现代速度的原型：人以为自己在使用系统，系统也在塑造人。",
+      "items": [
+        {
+          "id": "III-01",
+          "role": "core",
+          "quote": "Why should we live with such hurry and waste of life?",
+          "context": "他把 hurry 和 waste 放在一起：匆忙不一定意味着珍惜时间，也可能正是浪费时间的方式。",
+          "prompt": "你最近一次匆忙，是为了更快抵达，还是为了逃避停下来？"
+        },
+        {
+          "id": "III-02",
+          "role": "support",
+          "quote": "We do not ride on the railroad; it rides upon us.",
+          "context": "工具从交通手段变成制度后，人需要调整生活来供养它。今天也可以把 railroad 换成通知、平台或模型。",
+          "prompt": "你正在使用的哪个工具，已经开始规定你的节奏？"
+        },
+        {
+          "id": "III-03",
+          "role": "turn",
+          "quote": "Men think that it is essential that the Nation have commerce, and export ice, and talk through a telegraph, and ride thirty miles an hour.",
+          "context": "他怀疑的不是技术能力，而是“能做到”如何被偷换成“必须做到”。",
+          "prompt": "你把哪一种社会默认，当成了不可讨论的个人需要？"
+        }
+      ]
+    },
+    {
+      "id": "awake",
+      "index": "IV",
+      "kicker": "Awakening / 醒来",
+      "shortTitle": "保持清醒",
+      "title": "真正的清醒，是持续重新决定什么值得注意",
+      "description": "结尾不提供一套生活答案，而是把选择权重新交还给读者。",
+      "items": [
+        {
+          "id": "IV-01",
+          "role": "support",
+          "quote": "The morning, which is the most memorable season of the day, is the awakening hour.",
+          "context": "清晨在这里不是时间段，而是意识重新开始工作的隐喻：你能否不沿用昨天的默认设置？",
+          "prompt": "每天醒来后，什么东西最先夺走了你的注意力？"
+        },
+        {
+          "id": "IV-02",
+          "role": "core",
+          "quote": "We must learn to reawaken and keep ourselves awake, not by mechanical aids, but by an infinite expectation of the dawn.",
+          "context": "保持清醒不能完全外包给提醒器。它依赖一种仍相信生活可以被重新看见的期待。",
+          "prompt": "什么事情仍然能让你主动醒来，而不是被闹钟叫醒？"
+        },
+        {
+          "id": "IV-03",
+          "role": "core",
+          "quote": "To affect the quality of the day, that is the highest of arts.",
+          "context": "宏大的生活最后落在一天的质地上。艺术不只是制造作品，也是安排注意、节奏和关系。",
+          "prompt": "如果今天是一件作品，你愿意为它删掉哪一笔？"
+        }
+      ]
+    }
+  ]
+}

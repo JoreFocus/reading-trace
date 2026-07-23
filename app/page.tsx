@@ -1,8 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { reading } from "../data/walden";
-import type { MarkId, ReadingItem } from "../data/types";
+import readingData from "../data/reading.json";
+import type {
+  MarkId,
+  ReadingDocument,
+  ReadingItem,
+} from "../data/types";
+
+const reading = readingData as ReadingDocument;
 
 const marks: Array<{
   id: MarkId;
