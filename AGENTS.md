@@ -9,7 +9,7 @@
 3. 阅读 `docs/creating-with-agents.md`，确定这份材料适合怎样组织。
 4. 只修改 `data/reading.json` 即可生成新的阅迹；字段契约见 `data/reading.schema.json`。
 5. 运行 `npm run validate:content` 和 `npm test`。
-6. 只有当内容确实要求新的交互关系时，才修改 `app/page.tsx` 与 `app/globals.css`。
+6. 只有当内容确实要求新的交互关系时，才修改 `templates/reading-trace.html`。`app/page.tsx` 只是默认入口，不承载阅迹设计。
 
 ## 三层信息不得混淆
 
