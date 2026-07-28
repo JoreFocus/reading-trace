@@ -17,12 +17,13 @@
 
 ## 功能
 
-- 数据驱动的章节、引文、结构角色与碰撞问题；
+- 数据驱动的章节、命题与结构角色；
 - 五档读者判断及即时进度统计；
 - 对低认同标记自动打开追问；
 - 按标记筛选，键盘移动和快捷标注；
 - 设备本地自动保存；
-- 一键导出 Markdown 阅读轨迹；
+- 一键复制紧凑的阅读标注结果；
+- 深浅色模式与完成后的收束分镜；
 - 桌面端与移动端响应式界面。
 
 ## 快速开始
@@ -44,8 +45,7 @@ npm test
 
 ## 换成自己的阅读材料
 
-编辑 `data/reading.json` 即可，不需要修改页面代码。字段定义见
-`data/reading.schema.json`，保存后可以先运行：
+编辑 `data/reading.json` 即可，不需要修改页面代码。启动和构建前，项目会自动把数据同步到已经打磨好的交互模板。字段定义见 `data/reading.schema.json`，保存后可以先运行：
 
 ```bash
 npm run validate:content
@@ -63,7 +63,7 @@ npm run validate:content
 }
 ```
 
-界面不要求固定使用某种阅读理论；`core / support / turn` 的显示名称可以在数据文件中自行配置。
+界面显示 `context` 作为供读者判断的命题，`roleLabels` 作为命题旁的结构标签；`quote` 与 `prompt` 继续保留在数据层，便于 Agent 检查来源边界与提炼逻辑。界面不要求固定使用某种阅读理论；`core / support / turn` 的显示名称可以自行配置。
 
 ## 与 Codex / Claude Code 一起使用
 

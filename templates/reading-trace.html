@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 依赖反思与个人成长复盘 · 阅迹体验版</title>
+<meta name="description" content="一份关于 AI 依赖、个人成长与主体性的交互式伴读标注。">
+<meta property="og:title" content="AI 依赖反思与个人成长复盘 · 阅迹体验版">
+<meta property="og:description" content="工具越强，越要确认离开工具之后，自己仍然拥有怎样的判断、能力与节奏。">
+<script>
+  (() => {
+    try {
+      const saved = localStorage.getItem('reading-trace-theme');
+      const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.dataset.theme = theme;
+    } catch (_) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f4ede0;
+    --ink:       #1a1410;
+    --ink-soft:  #5a5048;
+    --ink-mute:  #998c7a;
+    --line:      #d6ccb5;
+    --line-soft: #e8dfc9;
+    --pop:       #c44521;
+    --yes:       #2d7a52;
+    --yes-soft:  rgba(45, 122, 82, 0.18);
+    --mid:       #b8851a;
+    --mid-soft:  rgba(184, 133, 26, 0.18);
+    --hold:      #6b7280;
+    --hold-soft: rgba(107, 114, 128, 0.18);
+    --no:        #a8341e;
+    --no-soft:   rgba(168, 52, 30, 0.18);
+    /* 发光晕用的"光色"——比底色 #f4ede0 更亮，soft-light 合成是提亮+染色，不发脏 */
+    --yes-glow:  #7be0a8;
+    --mid-glow:  #f5d870;
+    --hold-glow: #c8d2dd;
+    --no-glow:   #ffa088;
+    --deep:      #5046e4;
+    --deep-soft: rgba(80, 70, 228, 0.15);
+    --deep-glow: #a5b4fc;
+  }
+  @property --light-x {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 50%;
+  }
+  @property --light-intensity {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  @property --sweep {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ─── Decorative background blobs for glass to refract ─── */
+  .blob {
+    position: fixed; pointer-events: none; z-index: 0;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.55;
+  }
+  .blob.b1 { top: -10%;  right: -8%;  width: 480px; height: 480px; background: radial-gradient(circle, #f4a980, transparent 70%); }
+  .blob.b2 { bottom: 10%; left: -10%; width: 520px; height: 520px; background: radial-gradient(circle, #e8c870, transparent 70%); }
+  .blob.b3 { top: 35%;   right: 20%;  width: 380px; height: 380px; background: radial-gradient(circle, #c4a890, transparent 70%); opacity: 0.4; }
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    background-image: radial-gradient(rgba(154,135,100,0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* ─── Drawer (collapsed by default) ─── */
+  .drawer-toggle {
+    position: fixed; top: 24px; left: 24px; z-index: 50;
+    width: 44px; height: 44px;
+    background: rgba(255, 252, 245, 0.65);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 4px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.7) inset;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .drawer-toggle:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.7) inset; }
+  .drawer-toggle span {
+    display: block; width: 16px; height: 1.5px; background: var(--ink); border-radius: 1px;
+    transition: all 0.3s;
+  }
+  .drawer-toggle.active span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+  .drawer-toggle.active span:nth-child(2) { opacity: 0; }
+  .drawer-toggle.active span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+  .drawer-backdrop {
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(26, 20, 16, 0.2);
+    backdrop-filter: blur(4px);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  .drawer {
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 45;
+    width: 280px;
+    background: rgba(255, 252, 245, 0.85);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border-right: 1px solid rgba(255,255,255,0.5);
+    padding: 88px 28px 28px;
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    overflow-y: auto;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-brand {
+    font-family: 'Fraunces', serif; font-weight: 800; font-style: italic;
+    font-size: 22px; letter-spacing: -0.02em; margin-bottom: 4px;
+  }
+  .drawer-sub { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 32px; }
+  .drawer-nav { list-style: none; padding: 0; margin: 0; }
+  .drawer-nav li { margin: 0 0 4px; }
+  .drawer-nav a {
+    display: flex; align-items: baseline; gap: 12px;
+    color: var(--ink-soft); text-decoration: none;
+    padding: 8px 0 8px 14px; font-size: 13px;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .drawer-nav a:hover { color: var(--ink); border-left-color: var(--pop); padding-left: 18px; }
+  .drawer-nav a .grp-letter { font-family: 'Fraunces', serif; font-weight: 800; font-size: 17px; color: var(--ink); }
+  .drawer-nav a .grp-count { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-mute); }
+  .drawer-foot { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-mute); line-height: 1.8; }
+  .drawer-foot kbd { background: rgba(26,20,16,0.08); padding: 2px 6px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+
+  /* ─── Main ─── */
+  .main { max-width: 880px; margin: 0 auto; padding: 56px 32px 80px; position: relative; z-index: 2; }
+
+  /* ─── Top bar / progress ─── */
+  .topbar {
+    position: sticky; top: 16px; z-index: 30;
+    margin-bottom: 32px;
+    padding: 16px 22px;
+    background: rgba(255, 252, 245, 0.6);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.7) inset;
+  }
+  .topbar-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .progress-text { font-family: 'JetBrains Mono', monospace; font-size: 13px; display: flex; align-items: baseline; gap: 2px; }
+  .progress-text .done {
+    font-size: 22px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    display: inline-block;
+    color: var(--ink);
+    transition: color 0.2s;
+  }
+  .progress-text .done.bump { animation: numBump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .progress-text .total { color: var(--ink-mute); }
+  .stats { display: flex; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .stat { display: flex; align-items: center; gap: 6px; }
+  .stat-dot { width: 9px; height: 9px; border-radius: 50%; transition: transform 0.2s; }
+  .stat.bumped .stat-dot { animation: dotPulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .stat-dot.deep { background: var(--deep); }
+  .stat-dot.yes  { background: var(--yes); }
+  .stat-dot.mid  { background: var(--mid); }
+  .stat-dot.hold { background: var(--hold); }
+  .stat-dot.no   { background: var(--no); }
+  .stat-num { font-variant-numeric: tabular-nums; display: inline-block; min-width: 14px; transition: color 0.2s; }
+  .stat.bumped .stat-num { animation: numBump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes numBump {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.4) translateY(-2px); color: var(--pop); }
+    100% { transform: scale(1); }
+  }
+  @keyframes dotPulse {
+    0%   { transform: scale(1); box-shadow: 0 0 0 0 currentColor; }
+    50%  { transform: scale(1.6); box-shadow: 0 0 0 6px transparent; }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
+  }
+  .progress-bar { height: 2px; background: rgba(26,20,16,0.08); border-radius: 1px; margin-top: 12px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--ink); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+  /* ─── Header ─── */
+  header.head { padding: 24px 0 24px; margin-bottom: 32px; border-bottom: 1px solid var(--line-soft); position: relative; }
+  .head-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--pop); margin-bottom: 16px; }
+  h1.title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 14px;
+  }
+  h1.title em { font-style: normal; font-weight: 400; color: var(--pop); }
+  .head-meta { font-size: 13px; color: var(--ink-mute); }
+  .head-meta span + span::before { content: " · "; margin: 0 6px; }
+
+  /* ─── Core proposition (glass) ─── */
+  .core {
+    margin: 36px 0 40px;
+    padding: 28px 32px;
+    background: rgba(255, 252, 245, 0.45);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.5);
+    border-left: 4px solid var(--pop);
+    border-radius: 14px;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.7) inset;
+  }
+  .core::before {
+    content: "/ 核心 /";
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--pop);
+    position: absolute; top: -9px; left: 32px;
+    background: var(--bg); padding: 0 10px;
+  }
+  .core-lead {
+    margin: 0;
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: 17.5px;
+    line-height: 1.75;
+    color: var(--ink);
+    text-align: center;
+  }
+  .core-hero {
+    margin: 24px 0 22px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(28px, 4.4vw, 40px);
+    line-height: 1.15;
+    color: var(--pop);
+    text-align: center;
+    letter-spacing: 0.01em;
+    position: relative;
+  }
+  .core-hero::before, .core-hero::after {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--pop);
+    vertical-align: middle;
+    opacity: 0.5;
+    margin: 0 18px 6px;
+  }
+  .core-tail {
+    margin: 0;
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: 15.5px;
+    line-height: 1.75;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  /* ─── Filter bar ─── */
+  .filters { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-btn {
+    border: 1px solid rgba(26,20,16,0.15); background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(8px);
+    color: var(--ink-soft); padding: 7px 13px; border-radius: 999px;
+    font-size: 12px; cursor: pointer; transition: all 0.2s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .filter-btn:hover { border-color: var(--ink); color: var(--ink); transform: translateY(-1px); }
+  .filter-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  /* ─── Group ─── */
+  .group { margin: 48px 0; scroll-margin-top: 100px; }
+  .group-head {
+    display: flex; align-items: baseline; gap: 20px;
+    padding-bottom: 14px; margin-bottom: 12px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .group-letter {
+    font-family: 'Fraunces', serif; font-weight: 800; font-style: italic;
+    font-size: 56px; line-height: 0.9; color: var(--pop);
+    letter-spacing: -0.04em;
+  }
+  .group-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; letter-spacing: -0.01em; flex: 1; }
+  .group-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-mute); }
+
+  /* ─── Proposition wrapper：承载 prop + 它的不规则发光晕 ─── */
+  .prop-wrap {
+    position: relative;
+    margin: 18px 0;
+  }
+  /* 发光晕：标记色泛到周围背景上，每条不规则形状，多条相互辉映 */
+  .prop-glow {
+    position: absolute;
+    inset: var(--glow-inset, -70px -140px);
+    border-radius: var(--glow-radius, 50% 48% 52% 50% / 48% 52% 50% 52%);
+    background-color: transparent;
+    filter: blur(56px);
+    opacity: 0;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+    transform: var(--glow-transform, none);
+    transition:
+      opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    contain: layout style paint;
+  }
+  .prop-wrap[data-mark="💡"] .prop-glow { background-color: var(--deep-glow); opacity: 0.55; }
+  .prop-wrap[data-mark="✅"] .prop-glow { background-color: var(--yes-glow); opacity: 0.45; }
+  .prop-wrap[data-mark="🟡"] .prop-glow { background-color: var(--mid-glow); opacity: 0.45; }
+  .prop-wrap[data-mark="⚪"] .prop-glow { background-color: var(--hold-glow); opacity: 0.24; }
+  .prop-wrap[data-mark="❌"] .prop-glow { background-color: var(--no-glow); opacity: 0.45; }
+  .prop-wrap:has(.prop[data-hidden="1"]) .prop-glow { opacity: 0 !important; }
+
+  /* ─── Proposition (iOS 26 LIQUID GLASS) ─── */
+  .prop {
+    --sweep: 0;
+    --fill-sweep: transparent;
+    --light-x: 50%;
+    --light-intensity: 0;
+    --fill: transparent;
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 22px;
+    padding: 26px 28px;
+    margin: 0;
+    align-items: start;
+    position: relative;
+    border-radius: 26px;
+    /* Background: glass gradients only — bg-color stays available for remark sweep */
+    background-image:
+      linear-gradient(180deg,
+        rgba(255,255,255,0.10) 0%,
+        rgba(255,255,255,0.02) 45%,
+        rgba(255,250,240,0.06) 100%);
+    background-color: transparent;
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    /* 视口外整个 prop 不渲染：省掉 backdrop-filter 的 readback、::after 重绘等大头 */
+    content-visibility: auto;
+    contain-intrinsic-size: 0 130px;
+    border: 1px solid transparent;
+    box-shadow:
+      /* Outer shadow stack — ambient → key */
+      0 1px 2px rgba(40,28,16,0.05),
+      0 6px 14px -4px rgba(40,28,16,0.10),
+      0 24px 48px -12px rgba(40,28,16,0.22),
+      /* Edge lensing — hairline bright rim all around */
+      0 0 0 0.5px rgba(255,255,255,0.55) inset,
+      /* Top concentrated specular line (light source above) */
+      0 1.5px 0 rgba(255,255,255,0.92) inset,
+      /* Bottom secondary edge (dimmer reflection) */
+      0 -1px 0 rgba(255,255,255,0.32) inset,
+      /* Inner glow inward — the "lens" depth */
+      0 0 20px rgba(255,255,255,0.18) inset,
+      /* Subtle inner bottom-right form shadow */
+      -8px -10px 22px -6px rgba(60,40,20,0.05) inset;
+    overflow: hidden;
+    transition:
+      --light-x 0.12s cubic-bezier(0.3, 0, 0.3, 1),
+      --light-intensity 0.28s cubic-bezier(0.3, 0, 0.3, 1),
+      --sweep 1.1s cubic-bezier(0.22, 0.61, 0.36, 1),
+      box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.35s cubic-bezier(0.34, 1.2, 0.64, 1),
+      border-color 0.3s;
+  }
+  /* snap-sweep：在需要瞬间改 --sweep（不动画）时挂上，复用其它过渡 */
+  .prop.snap-sweep {
+    transition:
+      --light-x 0.12s cubic-bezier(0.3, 0, 0.3, 1),
+      --light-intensity 0.28s cubic-bezier(0.3, 0, 0.3, 1),
+      box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.35s cubic-bezier(0.34, 1.2, 0.64, 1),
+      border-color 0.3s;
+  }
+  .prop:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 1px 2px rgba(40,28,16,0.06),
+      0 12px 24px -4px rgba(40,28,16,0.14),
+      0 36px 64px -14px rgba(40,28,16,0.28),
+      0 0 0 0.5px rgba(255,255,255,0.72) inset,
+      0 1.5px 0 rgba(255,255,255,1) inset,
+      0 -1px 0 rgba(255,255,255,0.40) inset,
+      0 0 28px rgba(255,255,255,0.28) inset,
+      -8px -10px 22px -6px rgba(60,40,20,0.05) inset;
+  }
+  .prop.focused {
+    box-shadow:
+      0 0 0 2px var(--pop),
+      0 0 0 6px rgba(196,69,33,0.10),
+      0 14px 36px -8px rgba(196,69,33,0.26),
+      0 4px 12px -2px rgba(40,28,16,0.08),
+      0 0 0 0.5px rgba(255,255,255,0.55) inset,
+      0 1.5px 0 rgba(255,255,255,0.92) inset,
+      0 -1px 0 rgba(255,255,255,0.32) inset,
+      0 0 22px rgba(255,255,255,0.22) inset;
+  }
+  .prop[data-hidden="1"] { display: none; }
+
+  /* 底色层：承载当前已提交的标记色。
+     与 wash 互补的 inverse mask：wash 显示哪里，这里就 mask 掉；
+     总是恰好一层在画色，alpha 单层不叠加，颜色不会变深。 */
+  .prop::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--fill);
+    border-radius: inherit;
+    -webkit-mask-image: linear-gradient(to left,
+      rgba(0,0,0,0)    calc(var(--sweep) * 1% - 30%),
+      rgba(0,0,0,0.18) calc(var(--sweep) * 1% - 20%),
+      rgba(0,0,0,0.45) calc(var(--sweep) * 1% - 13%),
+      rgba(0,0,0,0.72) calc(var(--sweep) * 1% - 7%),
+      rgba(0,0,0,0.90) calc(var(--sweep) * 1% - 2%),
+      rgba(0,0,0,1)    calc(var(--sweep) * 1%)
+    );
+    mask-image: linear-gradient(to left,
+      rgba(0,0,0,0)    calc(var(--sweep) * 1% - 30%),
+      rgba(0,0,0,0.18) calc(var(--sweep) * 1% - 20%),
+      rgba(0,0,0,0.45) calc(var(--sweep) * 1% - 13%),
+      rgba(0,0,0,0.72) calc(var(--sweep) * 1% - 7%),
+      rgba(0,0,0,0.90) calc(var(--sweep) * 1% - 2%),
+      rgba(0,0,0,1)    calc(var(--sweep) * 1%)
+    );
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* 叠加扫色层：与 ::before 互补——它显示，::before 就消失。
+     新色单层呈现，alpha 与终态完全一致。 */
+  .prop-wash {
+    position: absolute; inset: 0;
+    background: var(--fill-sweep);
+    border-radius: inherit;
+    -webkit-mask-image: linear-gradient(to left,
+      rgba(0,0,0,1)    calc(var(--sweep) * 1% - 30%),
+      rgba(0,0,0,0.82) calc(var(--sweep) * 1% - 20%),
+      rgba(0,0,0,0.55) calc(var(--sweep) * 1% - 13%),
+      rgba(0,0,0,0.28) calc(var(--sweep) * 1% - 7%),
+      rgba(0,0,0,0.10) calc(var(--sweep) * 1% - 2%),
+      rgba(0,0,0,0)    calc(var(--sweep) * 1%)
+    );
+    mask-image: linear-gradient(to left,
+      rgba(0,0,0,1)    calc(var(--sweep) * 1% - 30%),
+      rgba(0,0,0,0.82) calc(var(--sweep) * 1% - 20%),
+      rgba(0,0,0,0.55) calc(var(--sweep) * 1% - 13%),
+      rgba(0,0,0,0.28) calc(var(--sweep) * 1% - 7%),
+      rgba(0,0,0,0.10) calc(var(--sweep) * 1% - 2%),
+      rgba(0,0,0,0)    calc(var(--sweep) * 1%)
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Specular layer — top crescent (follows mouse) + bottom reflection (stationary)
+     Normal alpha compositing — screen blend was invisible on cream bg.
+     Stays above fill so glass effect survives any mark color. */
+  .prop::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+      /* Bottom soft reflection — static, always on (baseline glass) */
+      linear-gradient(0deg,
+        rgba(255,255,255,0.38) 0%,
+        rgba(255,255,255,0.14) 5%,
+        rgba(255,255,255,0) 14%),
+      /* Top crescent — position via --light-x, brightness via --light-intensity
+         baseline 0.30 keeps a subtle static gleam; up to +0.65 when cursor is on/near */
+      radial-gradient(ellipse 45% 105% at var(--light-x) -6%,
+        rgba(255,255,255, calc(0.30 + 0.65 * var(--light-intensity))) 0%,
+        rgba(255,255,255, calc(0.18 + 0.37 * var(--light-intensity))) 18%,
+        rgba(255,255,255, calc(0.06 + 0.14 * var(--light-intensity))) 35%,
+        rgba(255,255,255, calc(0.01 + 0.03 * var(--light-intensity))) 55%,
+        rgba(255,255,255, 0) 75%);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .prop > :not(.prop-wash):not(.prop-trail) { position: relative; z-index: 3; }
+
+  /* 光痕：扫色完成的一刻一道高斯白光从右滑到左，模拟"颜色定型的余韵" */
+  .prop-trail {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 4;
+    opacity: 0;
+  }
+  .prop-trail::before {
+    content: '';
+    position: absolute;
+    top: -12%; bottom: -12%;
+    left: 0; width: 22%;
+    background: linear-gradient(90deg,
+      rgba(255,255,255, 0) 0%,
+      rgba(255,255,255, 0.28) 30%,
+      rgba(255,255,255, 0.70) 50%,
+      rgba(255,255,255, 0.28) 70%,
+      rgba(255,255,255, 0) 100%);
+    filter: blur(10px);
+    transform: translateX(460%);
+  }
+  .prop.trailing .prop-trail { animation: trail-fade 1.2s cubic-bezier(0.4, 0, 0.6, 1) forwards; }
+  .prop.trailing .prop-trail::before { animation: trail-glide 1.2s cubic-bezier(0.5, 0, 0.75, 0) forwards; }
+  @keyframes trail-fade {
+    0%   { opacity: 0; }
+    10%  { opacity: 1; }
+    70%  { opacity: 0.85; }
+    100% { opacity: 0; }
+  }
+  @keyframes trail-glide {
+    0%   { transform: translateX(-110%); }
+    100% { transform: translateX(460%); }
+  }
+
+  .prop[data-mark="💡"] { --fill: var(--deep-soft); }
+  .prop[data-mark="✅"] { --fill: var(--yes-soft); }
+  .prop[data-mark="🟡"] { --fill: var(--mid-soft); }
+  .prop[data-mark="⚪"] { --fill: var(--hold-soft); }
+  .prop[data-mark="❌"] { --fill: var(--no-soft); }
+
+  .prop-id {
+    font-family: 'Fraunces', serif; font-weight: 800; font-style: italic;
+    font-size: 24px; color: var(--ink); letter-spacing: -0.02em; padding-top: 2px;
+  }
+  .prop-body { min-width: 0; }
+  .prop-text {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: 17.5px;
+    line-height: 1.7;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .prop-strength {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--ink-mute);
+    margin-left: 10px; padding: 2px 7px;
+    border: 1px solid rgba(26,20,16,0.15); border-radius: 3px;
+    letter-spacing: 0.08em; vertical-align: middle; text-transform: uppercase;
+  }
+  .prop-note {
+    margin-top: 12px; padding-left: 14px;
+    border-left: 2px solid rgba(26,20,16,0.15);
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    color: var(--ink-soft); font-size: 14.5px; font-style: italic; line-height: 1.65;
+  }
+
+  /* ─── Marks ─── */
+  .marks { display: flex; gap: 5px; padding-top: 2px; }
+  .mark-btn {
+    width: 42px; height: 42px;
+    border: 1.5px solid rgba(26,20,16,0.15);
+    background: rgba(255,252,247,0.72);
+    border-radius: 8px;
+    cursor: pointer; font-size: 17px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.18s ease,
+                background-color 0.18s ease,
+                border-color 0.18s ease;
+    user-select: none;
+    color: var(--ink-mute);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset;
+  }
+  .mark-btn:hover { transform: translateY(-2px); color: var(--ink); box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6) inset; }
+  .mark-btn:active { transform: translateY(0); }
+  .mark-btn.selected { color: #fff; border-width: 2px; }
+  .mark-btn[data-mark="💡"].selected { background: var(--deep); border-color: var(--deep); box-shadow: 0 3px 0 rgba(80,70,228,0.35), 0 1px 0 rgba(255,255,255,0.3) inset; }
+  .mark-btn[data-mark="✅"].selected { background: var(--yes); border-color: var(--yes); box-shadow: 0 3px 0 rgba(45,122,82,0.35), 0 1px 0 rgba(255,255,255,0.3) inset; }
+  .mark-btn[data-mark="🟡"].selected { background: var(--mid); border-color: var(--mid); box-shadow: 0 3px 0 rgba(184,133,26,0.35), 0 1px 0 rgba(255,255,255,0.3) inset; }
+  .mark-btn[data-mark="⚪"].selected { background: var(--hold); border-color: var(--hold); box-shadow: 0 3px 0 rgba(107,114,128,0.35), 0 1px 0 rgba(255,255,255,0.3) inset; }
+  .mark-btn[data-mark="❌"].selected { background: var(--no); border-color: var(--no); box-shadow: 0 3px 0 rgba(168,52,30,0.35), 0 1px 0 rgba(255,255,255,0.3) inset; }
+  @keyframes pulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+  .mark-btn.just-clicked { animation: pulse 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+  /* ─── Footer / export ─── */
+  .footer-actions { margin-top: 56px; padding-top: 28px; border-top: 2px solid var(--ink); display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn {
+    background: var(--ink); color: var(--bg);
+    padding: 13px 22px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    border-radius: 8px;
+  }
+  .btn:hover { background: var(--pop); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(196,69,33,0.25); }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
+  .btn.ghost:hover { background: var(--ink); color: var(--bg); }
+
+  .export-area { margin-top: 20px; display: none; }
+  .export-area.show { display: block; animation: slideDown 0.35s ease; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .export-area p { margin: 0 0 10px; font-size: 13px; color: var(--ink-soft); }
+  /* 备注是按需支线：空白时完全隐藏；有内容时只留一行预览 */
+  .note-wrap { grid-column: 2 / -1; margin-top: 14px; }
+  .note-wrap:not(.open):not(.has-note) { display: none; }
+  .note-preview {
+    display: block; width: 100%; padding: 8px 14px;
+    border: 0; border-left: 2px solid rgba(26,20,16,0.14);
+    background: transparent; color: var(--ink-mute);
+    font: 12.5px/1.55 'Inter', -apple-system, "PingFang SC", sans-serif;
+    text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    cursor: pointer; opacity: 0.82; transition: color 0.2s, opacity 0.2s, border-color 0.2s;
+  }
+  .note-preview:hover { color: var(--ink-soft); opacity: 1; border-left-color: var(--pop); }
+  .note-wrap.open .note-preview { display: none; }
+  .note-input {
+    display: none; width: 100%; height: 42px; min-height: 42px; padding: 9px 14px;
+    background: rgba(255,252,245,0.52); border: 1px solid var(--line-soft);
+    border-radius: 14px; font-family: inherit; font-size: 13px; color: var(--ink-soft);
+    resize: none; box-sizing: border-box; line-height: 1.7;
+    white-space: pre-wrap; word-break: break-word;
+    transition: border-color 0.2s, background 0.25s, box-shadow 0.25s;
+  }
+  .note-wrap.open .note-input {
+    display: block;
+    animation: noteExpand 0.44s cubic-bezier(0.22, 1.0, 0.36, 1) both;
+    transform-origin: top left;
+  }
+  .note-wrap.collapsing .note-input {
+    animation: noteCollapse 0.3s cubic-bezier(0.55, 0, 0.78, 0.32) both;
+    transform-origin: top left;
+  }
+  .note-input:focus {
+    outline: none; border-color: var(--ink-mute);
+    background: rgba(255,252,245,0.9);
+    box-shadow: 0 4px 22px rgba(0,0,0,0.08);
+  }
+  .note-input::placeholder { color: var(--ink-mute); font-size: 12.5px; white-space: nowrap; }
+  @keyframes noteExpand {
+    from { opacity: 0; transform: scale(0.86) translateY(-10px); }
+    55%  { opacity: 0.9; }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes noteCollapse {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to   { opacity: 0; transform: scale(0.8) translateY(-8px); }
+  }
+  textarea {
+    width: 100%; min-height: 180px; padding: 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6;
+    border: 1px solid var(--line); border-radius: 10px;
+    resize: vertical;
+    background: rgba(255, 252, 245, 0.6); backdrop-filter: blur(8px);
+    color: var(--ink);
+  }
+
+  /* ─── Completion banner ─── */
+  /* ─── 起始态 hint：第一次进入、还未标记任何条目时浮现，标第一条后淡出 ─── */
+  .first-hint {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: -4px 0 18px;
+    letter-spacing: 0.01em;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition:
+      opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1),
+      transform 1.4s cubic-bezier(0.25, 1, 0.5, 1);
+    pointer-events: none;
+  }
+  .first-hint.show { opacity: 0.7; transform: translateY(0); }
+  .first-hint em { color: var(--pop); font-style: italic; font-weight: 500; opacity: 0.85; }
+
+  /* ─── 收束分镜：进度条从顶端飞到中央慢动作完成 → 隐去 → 大字浮现 → 按钮 ─── */
+
+  /* Stage 容器：固定全屏，初始隐藏 */
+  .closing-stage {
+    position: fixed; inset: 0;
+    z-index: 9999;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 36px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0s linear 0.6s;
+  }
+  body.in-closing .closing-stage { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.6s ease, visibility 0s; }
+
+  /* 背景层：分镜启动后，整页 main 被柔模糊 + 微暗 + 暖底略亮，把焦点逼到中央 */
+  body.in-closing .main { filter: blur(8px) brightness(0.86) saturate(1.05); transition: filter 1.0s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none; }
+  body.in-closing .topbar { opacity: 0; transition: opacity 0.4s ease; }
+  body.in-closing .hamburger,
+  body.in-closing .kbd-toggle,
+  body.in-closing .kbd-hint,
+  body.in-closing .drawer,
+  body.in-closing .drawer-backdrop { opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s linear 0.3s; }
+
+  /* Stage 内进度条（放大版） */
+  .closing-progress {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 22px;
+    width: min(640px, 78vw);
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+    transition:
+      opacity 0.9s cubic-bezier(0.25, 1, 0.5, 1),
+      transform 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  body.in-closing .closing-progress { opacity: 1; transform: translateY(0) scale(1); }
+  body.in-closing.stage-fadeout .closing-progress {
+    opacity: 0; transform: translateY(-12px) scale(0.985);
+    transition: opacity 1.2s cubic-bezier(0.4, 0, 0.6, 1), transform 1.2s cubic-bezier(0.4, 0, 0.6, 1);
+  }
+
+  .closing-progress-text {
+    font-family: 'Fraunces', serif;
+    font-feature-settings: 'tnum';
+    color: var(--ink);
+    font-size: clamp(72px, 9vw, 120px);
+    font-weight: 300;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .closing-progress-text .closing-done {
+    font-style: italic;
+    color: var(--pop);
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-block;
+  }
+  .closing-progress-text .closing-done.tick { transform: scale(1.18); }
+  .closing-progress-text .closing-slash {
+    font-size: 0.55em; color: var(--ink-soft); opacity: 0.55;
+    margin: 0 6px;
+  }
+  .closing-progress-text .closing-total { font-size: 0.55em; color: var(--ink-mute); opacity: 0.8; }
+
+  .closing-bar {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: rgba(40, 28, 16, 0.10);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .closing-bar-fill {
+    position: absolute; inset: 0 auto 0 0;
+    width: 0%;
+    background: linear-gradient(90deg,
+      var(--pop) 0%,
+      #d97551 50%,
+      var(--pop) 100%);
+    border-radius: 6px;
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    transition: width 1.6s cubic-bezier(0.6, 0.02, 0.3, 1);
+  }
+  /* 完成那一刻的高光扫过 */
+  .closing-bar-fill::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.7) 50%,
+      rgba(255,255,255,0) 100%);
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  .closing-bar-fill.swept::after {
+    animation: closing-bar-sweep 1.1s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+  }
+  @keyframes closing-bar-sweep {
+    0%   { opacity: 0; transform: translateX(-100%); }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(120%); }
+  }
+
+  /* 大字 + 子字 — 绝对居中，独立于 progress 占位 */
+  .closing-text {
+    position: absolute;
+    left: 50%; top: 50%;
+    text-align: center;
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 20px)) scale(0.985);
+    filter: blur(4px);
+    transition:
+      opacity 1.6s cubic-bezier(0.25, 1, 0.5, 1),
+      transform 1.8s cubic-bezier(0.25, 1, 0.5, 1),
+      filter 1.8s cubic-bezier(0.25, 1, 0.5, 1);
+    pointer-events: none;
+  }
+  body.in-closing.stage-text .closing-text { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
+  .closing-text .closing-headline {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(54px, 8vw, 96px);
+    color: var(--pop);
+    letter-spacing: 0.02em;
+    text-shadow:
+      0 0 32px rgba(196,69,33,0.10),
+      0 1px 0 rgba(255,253,247,0.4);
+  }
+  .closing-text .closing-sub {
+    margin-top: 18px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink-soft);
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+  }
+
+  /* 按钮组 — 绝对定位在屏幕下方 */
+  .closing-actions {
+    position: absolute;
+    left: 50%; bottom: 14vh;
+    transform: translate(-50%, 10px);
+    display: flex;
+    gap: 14px;
+    opacity: 0;
+    transition:
+      opacity 1.0s cubic-bezier(0.25, 1, 0.5, 1),
+      transform 1.0s cubic-bezier(0.25, 1, 0.5, 1);
+    pointer-events: none;
+  }
+  body.in-closing.stage-actions .closing-actions { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .closing-btn {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(40,28,16,0.18);
+    background: rgba(255,253,247,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--ink);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.06);
+  }
+  .closing-btn:hover { transform: translateY(-2px); background: rgba(255,253,247,1); box-shadow: 0 4px 18px rgba(0,0,0,0.10); }
+  .closing-btn.primary {
+    background: var(--ink); color: var(--bg);
+    border-color: var(--ink);
+  }
+  .closing-btn.primary:hover { background: var(--pop); border-color: var(--pop); }
+
+  /* 完成后页面 mood：所有 glow 同步提亮一档，营造"汇拢" — 模糊解除后仍保留 */
+  body.completed .prop-wrap[data-mark="💡"] .prop-glow { opacity: 0.68; transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1); }
+  body.completed .prop-wrap[data-mark="✅"] .prop-glow,
+  body.completed .prop-wrap[data-mark="🟡"] .prop-glow,
+  body.completed .prop-wrap[data-mark="❌"] .prop-glow { opacity: 0.58; transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1); }
+  body.completed .prop-wrap[data-mark="⚪"] .prop-glow { opacity: 0.34; transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1); }
+
+  /* 复制成功后的 toast */
+  .closing-toast {
+    position: fixed;
+    bottom: 8vh; left: 50%;
+    transform: translate(-50%, 12px);
+    padding: 10px 20px;
+    border-radius: 999px;
+    background: rgba(40,28,16,0.92);
+    color: var(--bg);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10000;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .closing-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* 撤销 toast */
+  .undo-toast {
+    position: fixed; bottom: calc(8vh + 52px); left: 50%;
+    transform: translate(-50%, 12px);
+    padding: 9px 14px 9px 18px;
+    border-radius: 999px;
+    background: rgba(40,28,16,0.88);
+    color: var(--bg); font-size: 13px; letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 12px;
+    opacity: 0; pointer-events: none; z-index: 9999;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .undo-toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .undo-toast-btn {
+    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+    color: var(--bg); padding: 3px 11px; border-radius: 999px;
+    cursor: pointer; font-size: 12.5px; letter-spacing: 0.05em;
+    transition: background 0.15s;
+  }
+  .undo-toast-btn:hover { background: rgba(255,255,255,0.3); }
+
+  /* ─── Kbd hint ─── */
+  .kbd-toggle {
+    position: fixed; bottom: 24px; right: 24px; z-index: 50;
+    width: 40px; height: 40px;
+    background: rgba(255, 252, 245, 0.65);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    color: var(--ink-soft);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 50%;
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 700;
+    cursor: pointer; font-size: 17px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.7) inset;
+    transition: all 0.2s;
+  }
+  .kbd-toggle:hover { color: var(--pop); transform: scale(1.08) translateY(-2px); }
+  .kbd-hint {
+    position: fixed; bottom: 78px; right: 24px; z-index: 50;
+    background: rgba(26,20,16,0.92); color: var(--bg);
+    backdrop-filter: blur(12px);
+    padding: 14px 18px; border-radius: 10px;
+    font-size: 11.5px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em;
+    line-height: 2;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+    display: none;
+  }
+  .kbd-hint.show { display: block; animation: slideDown 0.3s; }
+  .kbd-hint kbd { background: rgba(255,255,255,0.16); padding: 2px 7px; border-radius: 4px; margin: 0 1px; }
+
+  /* ─── Theme ─── */
+  .theme-toggle {
+    position: fixed; top: 24px; right: 24px; z-index: 50;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgba(255, 252, 245, 0.65);
+    color: var(--ink-soft);
+    border: 1px solid rgba(255,255,255,0.6);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.7) inset;
+    cursor: pointer; font-size: 18px;
+    transition: transform 0.2s, color 0.2s, background 0.35s, border-color 0.35s;
+  }
+  .theme-toggle:hover { color: var(--pop); transform: translateY(-2px) rotate(8deg); }
+
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #161310;
+    --ink: #f2e8da;
+    --ink-soft: #c8baaa;
+    --ink-mute: #918376;
+    --line: #4a4037;
+    --line-soft: #312a24;
+    --pop: #e47652;
+    --yes: #58b889;
+    --yes-soft: rgba(88, 184, 137, 0.2);
+    --mid: #d2a449;
+    --mid-soft: rgba(210, 164, 73, 0.2);
+    --hold: #9ca6b3;
+    --hold-soft: rgba(156, 166, 179, 0.18);
+    --no: #df725e;
+    --no-soft: rgba(223, 114, 94, 0.2);
+    --deep: #8a82f6;
+    --deep-soft: rgba(138, 130, 246, 0.2);
+    --deep-glow: #746bea;
+    --yes-glow: #45936d;
+    --mid-glow: #ad8134;
+    --hold-glow: #697481;
+    --no-glow: #b85d4d;
+  }
+  html[data-theme="dark"] body { background: var(--bg); }
+  html[data-theme="dark"] .blob { opacity: 0.25; }
+  html[data-theme="dark"] .blob.b1 { background: radial-gradient(circle, #7f352c, transparent 70%); }
+  html[data-theme="dark"] .blob.b2 { background: radial-gradient(circle, #6f5522, transparent 70%); }
+  html[data-theme="dark"] .blob.b3 { background: radial-gradient(circle, #493a31, transparent 70%); }
+  html[data-theme="dark"] .grain { background-image: radial-gradient(rgba(235,215,190,0.035) 1px, transparent 1px); }
+  html[data-theme="dark"] .drawer-toggle,
+  html[data-theme="dark"] .theme-toggle,
+  html[data-theme="dark"] .kbd-toggle {
+    background: rgba(39, 33, 28, 0.78);
+    border-color: rgba(255, 238, 220, 0.12);
+    box-shadow: 0 8px 26px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.08) inset;
+  }
+  html[data-theme="dark"] .drawer,
+  html[data-theme="dark"] .topbar,
+  html[data-theme="dark"] .core {
+    background: rgba(31, 26, 22, 0.74);
+    border-color: rgba(255, 238, 220, 0.1);
+    box-shadow: 0 18px 44px rgba(0,0,0,0.24), 0 1px 0 rgba(255,255,255,0.06) inset;
+  }
+  html[data-theme="dark"] .drawer-backdrop { background: rgba(0,0,0,0.52); }
+  html[data-theme="dark"] .filter-btn:not(.active),
+  html[data-theme="dark"] .mark-btn,
+  html[data-theme="dark"] .closing-btn:not(.primary) {
+    background: rgba(42, 35, 30, 0.72);
+    border-color: rgba(242, 232, 218, 0.16);
+  }
+  html[data-theme="dark"] .filter-btn.active,
+  html[data-theme="dark"] .closing-btn.primary {
+    background: var(--pop);
+    color: #fff;
+    border-color: var(--pop);
+  }
+  html[data-theme="dark"] .closing-btn.primary:hover {
+    background: #f08a65;
+    border-color: #f08a65;
+    color: #fff;
+  }
+  html[data-theme="dark"] .prop {
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.012));
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.3),
+      0 10px 24px -8px rgba(0,0,0,0.45),
+      0 28px 58px -18px rgba(0,0,0,0.65),
+      0 0 0 0.5px rgba(255,255,255,0.11) inset,
+      0 1px 0 rgba(255,255,255,0.16) inset,
+      0 0 20px rgba(255,255,255,0.035) inset;
+  }
+  html[data-theme="dark"] .prop:hover {
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.35),
+      0 16px 34px -10px rgba(0,0,0,0.56),
+      0 40px 72px -22px rgba(0,0,0,0.72),
+      0 0 0 0.5px rgba(255,255,255,0.16) inset,
+      0 1px 0 rgba(255,255,255,0.2) inset,
+      0 0 24px rgba(255,255,255,0.05) inset;
+  }
+  html[data-theme="dark"] .prop-note,
+  html[data-theme="dark"] #export-text {
+    background: rgba(31, 26, 22, 0.82);
+    color: var(--ink);
+    border-color: rgba(242, 232, 218, 0.15);
+  }
+
+  @media (max-width: 640px) {
+    .theme-toggle { top: 16px; right: 16px; width: 40px; height: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- background -->
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+<div class="blob b3"></div>
+<div class="grain"></div>
+
+<!-- 墨流：feTurbulence 噪声 + feDisplacementMap 抖动边缘，把"圆"扭成"墨" -->
+<svg width="0" height="0" aria-hidden="true" style="position: absolute; pointer-events: none;">
+  <defs>
+    <filter id="ink-flow" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.013 0.019" numOctaves="2" seed="7" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="ink-flow-soft" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018 0.025" numOctaves="2" seed="13" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- drawer (collapsed) -->
+<button class="drawer-toggle" id="drawer-toggle" onclick="toggleDrawer()" aria-label="导航">
+  <span></span><span></span><span></span>
+</button>
+<button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="切换深浅色模式" title="切换深浅色模式">☾</button>
+<div class="drawer-backdrop" id="drawer-backdrop" onclick="toggleDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-brand">伴读<em>·</em>标注</div>
+  <div class="drawer-sub">Companion Reading</div>
+  <ul class="drawer-nav" id="drawer-nav"></ul>
+  <div class="drawer-foot">
+    <kbd>1</kbd>~<kbd>4</kbd> 标记<br>
+    <kbd>↓</kbd> <kbd>↑</kbd> 上下条<br>
+    <kbd>E</kbd> 编辑当前备注<br>
+    <kbd>←</kbd> <kbd>→</kbd> 切换筛选（记位置）<br>
+    <kbd>n</kbd> 下一个未标<br>
+    <kbd>esc</kbd> 取消焦点
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="progress-text"><span class="done" id="progress-text">0</span><span class="total">&nbsp;/&nbsp;<span id="progress-total">0</span></span></div>
+      <div class="stats">
+        <span class="stat" id="stat-deep"><span class="stat-dot deep"></span><span class="stat-num" id="count-deep">0</span></span>
+        <span class="stat" id="stat-yes"><span class="stat-dot yes"></span><span class="stat-num" id="count-yes">0</span></span>
+        <span class="stat" id="stat-mid"><span class="stat-dot mid"></span><span class="stat-num" id="count-mid">0</span></span>
+        <span class="stat" id="stat-hold"><span class="stat-dot hold"></span><span class="stat-num" id="count-hold">0</span></span>
+        <span class="stat" id="stat-no"><span class="stat-dot no"></span><span class="stat-num" id="count-no">0</span></span>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 0%"></div></div>
+  </div>
+
+  <header class="head">
+    <div class="head-eyebrow">阅迹体验版 / 伴读标注</div>
+    <h1 class="title">AI 依赖反思<br>与<em>个人成长</em>复盘</h1>
+    <div class="head-meta">
+      <span>树林 · 7 月 20 日直播逐字稿</span>
+      <span id="meta-count">— 条命题</span>
+    </div>
+  </header>
+
+  <div class="core">
+    <p class="core-lead">工具越强，越要确认离开工具之后，自己仍然拥有怎样的判断、能力与节奏。</p>
+    <p class="core-hero">借 AI 生长 · 不被 AI 掏空</p>
+    <p class="core-tail">主体性 → 身体底座 → 长期积累 → 主动给予</p>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">全部</button>
+    <button class="filter-btn" data-filter="unmarked">未标</button>
+    <button class="filter-btn" data-filter="💡">💡 深刻</button>
+    <button class="filter-btn" data-filter="✅">✅ 强烈</button>
+    <button class="filter-btn" data-filter="🟡">🟡 部分</button>
+    <button class="filter-btn" data-filter="⚪">⚪ 保留</button>
+    <button class="filter-btn" data-filter="❌">❌ 不认</button>
+  </div>
+
+  <p class="first-hint" id="first-hint">点击右侧 <em>✅ 🟡 ⚪ ❌</em> 标记你与每条命题的共鸣</p>
+
+  <div id="groups"></div>
+
+
+  <div class="footer-actions">
+    <button class="btn" onclick="exportMarks()">导出结果</button>
+    <button class="btn ghost" onclick="restoreOriginal()">还原初始</button>
+    <button class="btn ghost" onclick="resetMarks()">清空</button>
+  </div>
+
+  <div class="export-area" id="export-area">
+    <p>点击文本框即可复制：</p>
+    <textarea id="export-text" readonly></textarea>
+  </div>
+</main>
+
+<!-- 收束分镜舞台 -->
+<div class="closing-stage" id="closing-stage" aria-hidden="true">
+  <div class="closing-progress" id="closing-progress">
+    <div class="closing-progress-text">
+      <span class="closing-done" id="closing-done">0</span>
+      <span class="closing-slash">/</span>
+      <span class="closing-total" id="closing-total">0</span>
+    </div>
+    <div class="closing-bar"><div class="closing-bar-fill" id="closing-bar-fill"></div></div>
+  </div>
+  <div class="closing-text" id="closing-text">
+    <div class="closing-headline" id="closing-headline"></div>
+    <div class="closing-sub">已记下 · 可导出交给 ai</div>
+  </div>
+  <div class="closing-actions" id="closing-actions">
+    <button class="closing-btn" id="closing-back" type="button">返回修改</button>
+    <button class="closing-btn primary" id="closing-export" type="button">复制结果</button>
+  </div>
+</div>
+
+<button class="kbd-toggle" onclick="toggleKbdHint()" title="键盘快捷键">?</button>
+<div class="kbd-hint" id="kbd-hint">
+  <kbd>0</kbd> 💡 &nbsp;<kbd>1</kbd> ✅ &nbsp;<kbd>2</kbd> 🟡 &nbsp;<kbd>3</kbd> ⚪ &nbsp;<kbd>4</kbd> ❌<br>
+  <kbd>↓</kbd> 下一条 · <kbd>↑</kbd> 上一条<br>
+  <kbd>E</kbd> 打开 / 退出备注 · <kbd>esc</kbd> 退出编辑<br>
+  <kbd>←</kbd> 上一筛选 · <kbd>→</kbd> 下一筛选（记位置）<br>
+  <kbd>n</kbd> 下一个未标 · <kbd>enter</kbd> 保存并下一条 · <kbd>shift+enter</kbd> 换行
+</div>
+
+<script>
+const data = [
+  { group: 'A', title: 'AI 依赖：工具能力不等于我的能力', items: [
+    { id: 'A1', text: '当账号被封或工具暂时不可用时，人才会突然看清自己有多少能力已经外包给了 AI', strength: '起点', initial: null },
+    { id: 'A2', text: '离开 GPT、Claude 和所有 AI 之后，你仍应能清楚地知道自己是谁、能做什么、靠什么赚钱', strength: '骨架', initial: null },
+    { id: 'A3', text: '与 AI 深度融合最危险的错觉，是把模型的写作、编程和判断能力误认为自己的能力', strength: '核心', initial: null },
+    { id: 'A4', text: '避免被 AI 掏空，不是少用 AI，而是保证自己的有效表达、判断和思考没有比 AI 少太多', strength: '方法', initial: null },
+    { id: 'A5', text: 'AI 不会一夜消失，但偶尔脱离 AI 完成交付，是检验个人主体性和真实能力的必要压力测试', strength: '判断', initial: null },
+  ]},
+  { group: 'B', title: '成长策略：让 AI 放大长板，而非遮住短板', items: [
+    { id: 'B1', text: '不要主要用 AI 弥补短板，而要让 AI 最大程度放大自己的长板；前提是先知道长板在哪里', strength: '核心', initial: null },
+    { id: 'B2', text: '在不擅长的领域，AI 很容易顺着提问者的期待迎合，甚至把一篇差文章越夸越好', strength: '校验', initial: null },
+    { id: 'B3', text: 'AI 给出的分数常常缺少真实世界的标尺，不能代替市场反馈、专业判断和作品结果', strength: '边界', initial: null },
+    { id: 'B4', text: '无限生成之外，必须留下自己沉淀、探索和对话的时间，否则大脑不会因为产出增多而自动成长', strength: '骨架', initial: null },
+    { id: 'B5', text: '如果一项重要能力让你感到困难，亲自完成这项困难任务，往往正是最快的成长路径', strength: '方法', initial: null },
+  ]},
+  { group: 'C', title: '身体底座：睡眠先于抽象的自由', items: [
+    { id: 'C1', text: '睡眠变差会增加自我对话、内耗、犹疑和对未来的负面想象，许多“人生问题”首先是身体问题', strength: '体验', initial: null },
+    { id: 'C2', text: '连作息都无法控制时，很难谈行动自由和内心自由，因为承载自由的身体已经失去稳定性', strength: '核心', initial: null },
+    { id: 'C3', text: '判断睡眠、饮食和运动谁更重要，可以看“停止一天后，哪一项对能力的打击最大”', strength: '方法', initial: null },
+    { id: 'C4', text: '睡眠是健康行为的底座：睡不好会连锁破坏饮食、运动、决策和情绪状态', strength: '骨架', initial: null },
+    { id: 'C5', text: '稳定作息并不排斥看球、娱乐和临时事件；长期规划反而能提前为它们腾出更好的节奏', strength: '修正', initial: null },
+  ]},
+  { group: 'D', title: '长期主义：稳定生根，也允许主动停下', items: [
+    { id: 'D1', text: '长期在一个清晰支点上深挖，会让能力、作品和影响力稳定积累；频繁换方向则不断重置复利', strength: '核心', initial: null },
+    { id: 'D2', text: '探索不同维度确实会带来成长，但不能用“我喜欢探索”掩盖长期积累不足的代价', strength: '校验', initial: null },
+    { id: 'D3', text: '真正的休息是工作系统的一部分：它帮助恢复能量、中断惯性，并重新检查能力和资产沉淀', strength: '骨架', initial: null },
+    { id: 'D4', text: '同样是什么都不做，被定义为“摆烂”会持续煎熬，被主动安排为“休息”才可能产生恢复', strength: '深刻', initial: null },
+    { id: 'D5', text: '突然干不动后的停摆不是休息，而是崩溃；状态波动越大，回到原有水平所需时间越长', strength: '判断', initial: null },
+    { id: 'D6', text: '稳定、可预期地持续输出，通常比兴奋时爆发产出、随后长时间停工更有长期价值', strength: '收束', initial: null },
+  ]},
+  { group: 'E', title: '从索取到给予：合作与机制的复利', items: [
+    { id: 'E1', text: '人在平静时更容易感受到爱与满足；疯狂抓取时体验到的往往是迫切、匮乏和欲求不满', strength: '深刻', initial: null },
+    { id: 'E2', text: '做 IP 或经营关系时，把问题从“我要得到什么”改成“我能给世界什么”，动力会更稳定', strength: '核心', initial: null },
+    { id: 'E3', text: '给予不是无条件牺牲，而是理解对方的局限，再选择对方真正能接住的价值和表达方式', strength: '修正', initial: null },
+    { id: 'E4', text: '好的合作不仅靠教会一个人，还要设计身份、责任、利益和长期共同前进的机制', strength: '组织', initial: null },
+    { id: 'E5', text: '零碎善意只有被固化成网站、流程、角色和固定渠道，才会成为可以反复产生价值的系统', strength: '机制', initial: null },
+    { id: 'E6', text: '反思只有落到具体问题和行动改变上，才不是一场听起来深刻、实际没有沉淀的自我对话', strength: '收束', initial: null },
+  ]}
+];
+
+const MARKS = ['💡', '✅', '🟡', '⚪', '❌'];
+const MARK_KEYS = { '0': '💡', '1': '✅', '2': '🟡', '3': '⚪', '4': '❌' };
+const MARK_TO_STAT = { '💡': 'deep', '✅': 'yes', '🟡': 'mid', '⚪': 'hold', '❌': 'no' };
+const MARK_TO_VAR = { '💡': '--deep-soft', '✅': '--yes-soft', '🟡': '--mid-soft', '⚪': '--hold-soft', '❌': '--no-soft' };
+const FILTERS = ['all', 'unmarked', '💡', '✅', '🟡', '⚪', '❌'];
+const STORAGE_KEY = 'ai-dependence-growth-review-reading-v1';
+const NOTES_KEY = STORAGE_KEY + '-notes';
+
+let state = {};
+let notes = {};
+let INITIAL = {};
+let undoState = null;
+let undoNotes = null;
+let undoTimer = null;
+let prevCounts = { deep: 0, yes: 0, mid: 0, hold: 0, no: 0, done: 0 };
+let currentFilter = 'all';
+let focusedId = null;
+let flatIds = [];
+let filterFocusMemory = {}; // 每个筛选 tab 内最后聚焦的 id
+
+function init() {
+  data.forEach(g => g.items.forEach(i => { flatIds.push(i.id); INITIAL[i.id] = i.initial; }));
+  FILTERS.forEach(f => filterFocusMemory[f] = null);
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    state = JSON.parse(saved);
+  } else {
+    data.forEach(g => g.items.forEach(i => state[i.id] = i.initial));
+  }
+  const savedNotes = localStorage.getItem(NOTES_KEY);
+  if (savedNotes) notes = JSON.parse(savedNotes);
+  // 动态写入总数（题目数量随数据变化）
+  const total = flatIds.length;
+  const totalEl = document.getElementById('progress-total');
+  if (totalEl) totalEl.textContent = total;
+  const metaEl = document.getElementById('meta-count');
+  if (metaEl) metaEl.textContent = `${total} 条命题`;
+
+  buildDrawerNav();
+  render();
+  bindFilters();
+  bindKeyboard();
+  bindGlassLight();
+  bindClosingStage();
+  bindNoteOutsideClick();
+  updateStats(true); // initial without animation
+}
+
+// 点击卡片之外：结束备注编辑。空备注完全隐藏，有内容则收成一行预览。
+function bindNoteOutsideClick() {
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.note-wrap.open').forEach(wrap => {
+      const prop = wrap.closest('.prop');
+      if (prop && prop.contains(e.target)) return;
+      collapseNoteWrap(wrap.dataset.id);
+    });
+  });
+}
+
+/* 全局液态玻璃光追：document 级 mousemove → 每条命题计算与 cursor 距离，
+   近 → 高光强且位置吸到 cursor；远 → 高光弱且回到中心。
+   配合 CSS transition --light-x / --light-intensity，做到永不"闪"。
+   性能：缓存 rect（用绝对位置，scroll 不失效）+ 曼哈顿早退 + 微变化跳过。 */
+let lightRectCache = null;
+function invalidateLightRects() { lightRectCache = null; }
+window.addEventListener('resize', invalidateLightRects);
+/* content-visibility: auto 让视口外 prop 用 130px 占位、入屏时换真实高度，
+   会导致下方 prop 的 pageY 漂移。滚动时作废 cache，下次 mousemove 重建。 */
+window.addEventListener('scroll', invalidateLightRects, { passive: true });
+
+/* 视口外的 .prop-glow 切 visibility: hidden，避免 23 个 blur+soft-light 全程合成 */
+let glowIO = null;
+function setupGlowVisibility() {
+  if (glowIO) glowIO.disconnect();
+  glowIO = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      const glow = en.target.querySelector('.prop-glow');
+      if (!glow) return;
+      glow.style.visibility = en.isIntersecting ? '' : 'hidden';
+    });
+  }, { rootMargin: '200px 0px' });
+  document.querySelectorAll('.prop-wrap').forEach(w => glowIO.observe(w));
+}
+
+function bindGlassLight() {
+  const PROXIMITY = 140;
+  let frame = null;
+  let lastEvent = null;
+  document.addEventListener('mousemove', (e) => {
+    lastEvent = e;
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      const ev = lastEvent;
+      if (!lightRectCache) {
+        lightRectCache = [];
+        const sx = window.scrollX, sy = window.scrollY;
+        document.querySelectorAll('.prop').forEach(row => {
+          if (row.dataset.hidden === '1') return;
+          const r = row.getBoundingClientRect();
+          lightRectCache.push({
+            row,
+            left:   r.left   + sx,
+            right:  r.right  + sx,
+            top:    r.top    + sy,
+            bottom: r.bottom + sy,
+            width:  r.width,
+            lastI: -1,
+            lastX: -1,
+          });
+        });
+      }
+      const pageX = ev.pageX, pageY = ev.pageY;
+      for (let i = 0; i < lightRectCache.length; i++) {
+        const c = lightRectCache[i];
+        const dx = Math.max(c.left - pageX, 0, pageX - c.right);
+        const dy = Math.max(c.top - pageY, 0, pageY - c.bottom);
+        // 早退：曼哈顿距离任一维超 PROXIMITY → intensity=0；上次已是 0 直接跳过
+        if (dx > PROXIMITY || dy > PROXIMITY) {
+          if (c.lastI !== 0) {
+            c.row.style.setProperty('--light-intensity', '0');
+            c.lastI = 0;
+          }
+          continue;
+        }
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const intensity = dist === 0 ? 1 : (dist >= PROXIMITY ? 0 : 1 - dist / PROXIMITY);
+        const rawXPct = ((pageX - c.left) / c.width) * 100;
+        const clampedXPct = rawXPct < 0 ? 0 : (rawXPct > 100 ? 100 : rawXPct);
+        const effectiveX = 50 + (clampedXPct - 50) * intensity;
+        // 微变化跳过：强度差 < 0.005 且 x 差 < 0.5% 时不写
+        if (Math.abs(c.lastI - intensity) < 0.005 && Math.abs(c.lastX - effectiveX) < 0.5) continue;
+        c.lastI = intensity;
+        c.lastX = effectiveX;
+        c.row.style.setProperty('--light-x', `${effectiveX.toFixed(2)}%`);
+        c.row.style.setProperty('--light-intensity', intensity.toFixed(3));
+      }
+      frame = null;
+    });
+  }, { passive: true });
+}
+
+function buildDrawerNav() {
+  const nav = document.getElementById('drawer-nav');
+  nav.innerHTML = data.map(g => `
+    <li><a href="#group-${g.group}" onclick="closeDrawer()">
+      <span class="grp-letter">${g.group}</span>
+      <span>${g.title}</span>
+      <span class="grp-count" id="dcount-${g.group}">0/${g.items.length}</span>
+    </a></li>
+  `).join('');
+}
+
+// 用 item.id 字符串当种子，产出一组确定但每条不同的发光晕参数
+// 形状 / 偏转 / 拉伸 / 溢出四向 → 多条并排时光斑相互错位、交相辉映
+function glowSeedStyle(id) {
+  const h = [...id].reduce((s, c) => s * 31 + c.charCodeAt(0), 7);
+  const pick = (mul, mod, off = 0) => off + Math.abs(h * mul) % mod;
+  const r1 = 38 + pick(7, 28),  r2 = 38 + pick(11, 28);
+  const r3 = 38 + pick(13, 28), r4 = 38 + pick(17, 28);
+  const r5 = 38 + pick(19, 28), r6 = 38 + pick(23, 28);
+  const r7 = 38 + pick(29, 28), r8 = 38 + pick(31, 28);
+  const rot   = pick(37, 24) - 12;            // -12 ~ +12 度
+  const sy    = (100 + pick(41, 30)) / 100;   // 1.00 ~ 1.30
+  const sx    = (100 + pick(43, 22)) / 100;   // 1.00 ~ 1.22
+  const top   = -50 - pick(47, 40);           // -50 ~ -90
+  const bot   = -50 - pick(53, 40);
+  const left  = -100 - pick(59, 80);          // -100 ~ -180
+  const right = -100 - pick(61, 80);
+  return [
+    `--glow-radius: ${r1}% ${r2}% ${r3}% ${r4}% / ${r5}% ${r6}% ${r7}% ${r8}%`,
+    `--glow-transform: rotate(${rot}deg) scale(${sx.toFixed(2)}, ${sy.toFixed(2)})`,
+    `--glow-inset: ${top}px ${right}px ${bot}px ${left}px`,
+  ].join(';') + ';';
+}
+
+function escapeHTML(value) {
+  return String(value || '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[ch]);
+}
+
+function render() {
+  const root = document.getElementById('groups');
+  root.innerHTML = '';
+  data.forEach(group => {
+    const g = document.createElement('div');
+    g.className = 'group';
+    g.id = `group-${group.group}`;
+    const groupMarked = group.items.filter(i => state[i.id]).length;
+    g.innerHTML = `
+      <div class="group-head">
+        <span class="group-letter">${group.group}</span>
+        <span class="group-title">${group.title}</span>
+        <span class="group-count" id="gcount-${group.group}">${groupMarked} / ${group.items.length}</span>
+      </div>
+    `;
+    group.items.forEach(item => {
+      const visible = filterShows(item);
+      const mark = state[item.id];
+      const wrap = document.createElement('div');
+      wrap.className = 'prop-wrap';
+      wrap.dataset.id = item.id;
+      wrap.style.cssText = glowSeedStyle(item.id);
+      if (mark) wrap.dataset.mark = mark;
+      if (!visible) wrap.style.display = 'none';
+      const prop = document.createElement('div');
+      prop.className = 'prop' + (focusedId === item.id ? ' focused' : '');
+      prop.dataset.id = item.id;
+      prop.dataset.hidden = visible ? '0' : '1';
+      if (mark) prop.dataset.mark = mark;
+      prop.innerHTML = `
+        <div class="prop-wash"></div>
+        <div class="prop-trail"></div>
+        <div class="prop-id">${item.id}</div>
+        <div class="prop-body">
+          <div class="prop-text">${item.text}<span class="prop-strength">${item.strength}</span></div>
+          ${item.note ? `<div class="prop-note">${item.note}</div>` : ''}
+        </div>
+        <div class="marks">
+          ${MARKS.map(m => `<div class="mark-btn ${mark === m ? 'selected' : ''}" data-mark="${m}" data-id="${item.id}">${m}</div>`).join('')}
+        </div>
+        <div class="note-wrap${notes[item.id] ? ' has-note' : ''}" data-id="${item.id}">
+          <button class="note-preview" data-id="${item.id}" title="点击编辑备注">↳ ${escapeHTML(notes[item.id])}</button>
+          <textarea class="note-input" data-id="${item.id}" placeholder="${notePlaceholder(mark)}">${escapeHTML(notes[item.id])}</textarea>
+        </div>
+      `;
+      const glow = document.createElement('div');
+      glow.className = 'prop-glow';
+      wrap.appendChild(glow);
+      wrap.appendChild(prop);
+      g.appendChild(wrap);
+    });
+    root.appendChild(g);
+  });
+
+  document.querySelectorAll('.mark-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = btn.dataset.id;
+      const mark = btn.dataset.mark;
+      // 鼠标点击同步键盘焦点（surgical，不重建 DOM）
+      setFocusedSurgical(id);
+      btn.classList.add('just-clicked');
+      setTimeout(() => btn.classList.remove('just-clicked'), 350);
+      setMark(id, mark);
+    });
+  });
+
+  // 已写备注的一行预览 → 点击进入编辑
+  document.querySelectorAll('.note-preview').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      setFocusedSurgical(id);
+      openNoteWrap(id, true, 'preview');
+    });
+  });
+
+  // 备注输入自动保存；E / Esc 退出，Enter 保存并前往下一张，Shift+Enter 换行
+  document.querySelectorAll('.note-input').forEach(ta => {
+    ta.addEventListener('input', () => {
+      const id = ta.dataset.id;
+      notes[id] = ta.value;
+      localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+      syncNotePresentation(id);
+    });
+    ta.addEventListener('keydown', (e) => {
+      const id = ta.dataset.id;
+      if (e.key === 'Escape' || (e.key.toLowerCase() === 'e' && !e.isComposing)) {
+        e.preventDefault();
+        collapseNoteWrap(id);
+        setFocusedSurgical(id);
+      } else if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        collapseNoteWrap(id);
+        moveFocus(1);
+      }
+    });
+  });
+
+  // 点击已标卡片正文 → 聚焦并进入备注；未标卡片只聚焦
+  document.querySelectorAll('.prop').forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.mark-btn') || e.target.closest('.note-wrap')) return;
+      const id = row.dataset.id;
+      setFocusedSurgical(id);
+      if (state[id]) openNoteWrap(id, true, 'card');
+    });
+  });
+  invalidateLightRects();
+  setupGlowVisibility();
+}
+
+function filterShows(item) {
+  if (currentFilter === 'all') return true;
+  if (currentFilter === 'unmarked') return !state[item.id];
+  return state[item.id] === currentFilter;
+}
+
+const LOW_AGREEMENT_MARKS = new Set(['🟡', '⚪', '❌']);
+
+function notePlaceholder(mark) {
+  if (mark === '🟡') return '哪一部分你不完全认同？（选填）';
+  if (mark === '⚪') return '你暂时保留判断的原因是？（选填）';
+  if (mark === '❌') return '你认为问题出在哪里？（选填）';
+  return '你想补充什么？（选填）';
+}
+
+function syncNotePresentation(id) {
+  const wrap = document.querySelector(`.note-wrap[data-id="${id}"]`);
+  if (!wrap) return;
+  const value = (notes[id] || '').trim();
+  wrap.classList.toggle('has-note', Boolean(value));
+  const preview = wrap.querySelector('.note-preview');
+  if (preview) preview.textContent = value ? `↳ ${value}` : '';
+}
+
+function openNoteWrap(id, focusTa, reason) {
+  const wrap = document.querySelector(`.note-wrap[data-id="${id}"]`);
+  if (!wrap) return;
+  if (reason) wrap.dataset.openReason = reason;
+  const ta = wrap.querySelector('.note-input');
+  if (ta) ta.placeholder = notePlaceholder(state[id]);
+  if (!wrap.classList.contains('open')) {
+    wrap.classList.remove('collapsing');
+    wrap.classList.add('open');
+  }
+  if (focusTa) setTimeout(() => {
+    if (ta) ta.focus();
+  }, 80);
+}
+
+function collapseNoteWrap(id) {
+  const wrap = document.querySelector(`.note-wrap[data-id="${id}"]`);
+  if (!wrap || !wrap.classList.contains('open')) return;
+  const ta = wrap.querySelector('.note-input');
+  if (document.activeElement === ta) ta.blur();
+  wrap.classList.add('collapsing');
+  const finish = () => {
+    wrap.classList.remove('open', 'collapsing');
+    delete wrap.dataset.openReason;
+    syncNotePresentation(id);
+    ta.removeEventListener('animationend', finish);
+  };
+  ta.addEventListener('animationend', finish);
+}
+
+function setMark(id, mark) {
+  const oldMark = state[id];
+  const newMark = oldMark === mark ? null : mark;
+  state[id] = newMark;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // 黄色及以下：展开提问，但不抢键盘焦点。绿色及以上：保持主流程干净。
+  if (newMark && LOW_AGREEMENT_MARKS.has(newMark) && oldMark !== newMark) {
+    openNoteWrap(id, false, 'low-mark');
+  } else if (!newMark || !LOW_AGREEMENT_MARKS.has(newMark)) {
+    collapseNoteWrap(id);
+  }
+
+  // 当前筛选下是否会因这次改变而隐藏/显现 → 需要全量 render
+  const wasVisible = filterShowsIdWithMark(id, oldMark);
+  const isVisible  = filterShowsIdWithMark(id, newMark);
+
+  if (wasVisible !== isVisible) {
+    render();
+  } else {
+    // surgical：只改这一行的 class / dataset / button selected 状态
+    const row = document.querySelector(`.prop[data-id="${id}"]`);
+    if (row) {
+      applyMarkToRow(row, oldMark, newMark);
+      row.querySelectorAll('.mark-btn').forEach(b => {
+        b.classList.toggle('selected', b.dataset.mark === newMark);
+      });
+    }
+    updateGroupCountForId(id);
+  }
+  updateStats();
+  return newMark;
+}
+
+function filterShowsIdWithMark(id, mark) {
+  if (currentFilter === 'all') return true;
+  if (currentFilter === 'unmarked') return !mark;
+  return mark === currentFilter;
+}
+
+const FILL_FOR_MARK = {
+  '💡': 'var(--deep-soft)',
+  '✅': 'var(--yes-soft)',
+  '🟡': 'var(--mid-soft)',
+  '⚪': 'var(--hold-soft)',
+  '❌': 'var(--no-soft)',
+};
+
+function triggerTrail(row) {
+  if (row._trailTimer) clearTimeout(row._trailTimer);
+  row.classList.remove('trailing');
+  void row.offsetWidth; // 强制 reflow 让 animation 可以重新触发
+  row.classList.add('trailing');
+  row._trailTimer = setTimeout(() => {
+    row.classList.remove('trailing');
+    row._trailTimer = null;
+  }, 1250);
+}
+
+function applyMarkToRow(row, oldMark, newMark) {
+  if (row._remarkTimer) { clearTimeout(row._remarkTimer); row._remarkTimer = null; }
+
+  // glow 跟 wash 同步浮现/退场：在 click 瞬间就切 wrap 的 data-mark，
+  // 不等 1.1s 后 prop.dataset.mark 才切——避免最终态色温跟扫色过程不一致。
+  const wrap = row.parentElement;
+  if (wrap) {
+    if (newMark) wrap.dataset.mark = newMark;
+    else delete wrap.dataset.mark;
+  }
+
+  const SWEEP_DURATION = 1100;
+  const snapSweep = (sweep, fillSweep) => {
+    row.classList.add('snap-sweep');
+    if (fillSweep !== undefined) row.style.setProperty('--fill-sweep', fillSweep);
+    row.style.setProperty('--sweep', String(sweep));
+    void row.offsetWidth;
+    row.classList.remove('snap-sweep');
+  };
+
+  if (newMark) {
+    // 首标 / 重标：wash 用新色从右刷到左；::before 用互补 mask 让旧色从右开始消，新色从右开始现，单层 alpha 不叠加
+    row.style.setProperty('--fill-sweep', FILL_FOR_MARK[newMark]);
+    requestAnimationFrame(() => row.style.setProperty('--sweep', '130'));
+    row._remarkTimer = setTimeout(() => {
+      // wash 完全覆盖之时把 ::before 的色切到新色（被 wash 盖住，瞬切无视觉）
+      row.dataset.mark = newMark;
+      requestAnimationFrame(() => {
+        // 再 snap 回 sweep=0：::before 立即承担显色，wash 立即隐身，颜色 1 帧无缝接管
+        snapSweep(0, 'transparent');
+        row._remarkTimer = null;
+        triggerTrail(row); // 颜色刚定型时滑出一道白光痕
+      });
+    }, SWEEP_DURATION);
+    return;
+  }
+
+  // 取消：旧色要从画面里退出
+  if (row.dataset.mark) {
+    // 已提交的标记：先无缝转交给 wash（同色全覆盖，::before 被 mask 掉，视觉不变）
+    snapSweep(130, FILL_FOR_MARK[oldMark]);
+    delete row.dataset.mark;
+  }
+  // 中途取消（data-mark 未提交）：wash 当前位于动画中某个 sweep 值，让它顺势退回 0
+  requestAnimationFrame(() => row.style.setProperty('--sweep', '0'));
+  row._remarkTimer = setTimeout(() => {
+    row.style.setProperty('--fill-sweep', 'transparent');
+    row._remarkTimer = null;
+    triggerTrail(row); // 取消时也留一道余光
+  }, SWEEP_DURATION);
+}
+
+function updateGroupCountForId(id) {
+  const group = data.find(g => g.items.some(i => i.id === id));
+  if (!group) return;
+  const marked = group.items.filter(i => state[i.id]).length;
+  const el = document.getElementById(`gcount-${group.group}`);
+  if (el) el.textContent = `${marked} / ${group.items.length}`;
+}
+
+function setFocusedSurgical(newId, { scroll = false } = {}) {
+  if (focusedId === newId && !scroll) return;
+  const prev = focusedId;
+  focusedId = newId;
+  filterFocusMemory[currentFilter] = newId;
+  if (prev) {
+    if (prev !== newId) collapseNoteWrap(prev);
+    const prevRow = document.querySelector(`.prop[data-id="${prev}"]`);
+    if (prevRow) prevRow.classList.remove('focused');
+  }
+  if (newId) {
+    const nextRow = document.querySelector(`.prop[data-id="${newId}"]`);
+    if (nextRow) nextRow.classList.add('focused');
+  }
+  if (scroll) scrollToFocused();
+}
+
+function updateStats(skipAnim) {
+  const total = flatIds.length;
+  let counts = { deep: 0, yes: 0, mid: 0, hold: 0, no: 0 };
+  let done = 0;
+  flatIds.forEach(id => {
+    const v = state[id];
+    if (v) { counts[MARK_TO_STAT[v]]++; done++; }
+  });
+
+  // Update progress big number with bump if changed
+  const progEl = document.getElementById('progress-text');
+  if (!skipAnim && done !== prevCounts.done) {
+    progEl.classList.remove('bump');
+    void progEl.offsetWidth;
+    progEl.classList.add('bump');
+  }
+  progEl.textContent = done;
+  document.getElementById('progress-fill').style.width = `${(done / total) * 100}%`;
+
+  // Update each stat with bump animation if changed
+  ['deep', 'yes', 'mid', 'hold', 'no'].forEach(k => {
+    const numEl = document.getElementById(`count-${k}`);
+    const statEl = document.getElementById(`stat-${k}`);
+    numEl.textContent = counts[k];
+    if (!skipAnim && counts[k] !== prevCounts[k]) {
+      statEl.classList.remove('bumped');
+      void statEl.offsetWidth;
+      statEl.classList.add('bumped');
+      setTimeout(() => statEl.classList.remove('bumped'), 500);
+    }
+  });
+
+  // Update drawer nav counts
+  data.forEach(g => {
+    const m = g.items.filter(i => state[i.id]).length;
+    const el = document.getElementById(`dcount-${g.group}`);
+    if (el) el.textContent = `${m}/${g.items.length}`;
+  });
+
+  // 起始态 hint：进入时 done=0 → 浮现；标了第一条 → 淡出
+  const hint = document.getElementById('first-hint');
+  if (hint) {
+    if (done === 0) hint.classList.add('show');
+    else hint.classList.remove('show');
+  }
+
+  // 收束分镜：所有题完成那一刻进入
+  const justCompleted  = done === total && prevCounts.done < total;
+  const justBackToWork = done <  total && prevCounts.done === total;
+  if (justCompleted) {
+    triggerClosingStage(skipAnim, done, total);
+  } else if (justBackToWork) {
+    document.body.classList.remove('completed');
+    exitClosingStage(true); // 静默退出（万一还在分镜里）
+  } else if (done === total) {
+    // 初次加载即已完成（skipAnim=true）—— 安静地把 mood 摆好，不放分镜
+    document.body.classList.add('completed');
+  }
+
+  prevCounts = { ...counts, done };
+}
+
+/* ── 收束分镜 ─────────────────────────────────────────────
+   t=0    标完最后一条 click → applyMarkToRow 走 sweep 1.1s + trail
+   t=1.3s 进入分镜：背景 blur + topbar 隐 + 中央进度条入场
+          进度条数字停在 N-1，bar 从 (N-1)/N 出发
+   t=2.0s bar 慢动作走到 N/N（1.6s），数字 tick 到 N
+   t=3.6s 完成那一秒 → bar 扫一道白光
+   t=4.8s 进度条 fade out
+   t=5.4s 大字 + 子字浮现（模糊→清晰、下沉→居中）
+   t=6.6s 按钮浮现
+   返回修改：所有 stage class 移除，main 模糊解除，topbar 复原  */
+let closingTimers = [];
+let closingArmed  = false;
+
+function triggerClosingStage(skipAnim, done, total) {
+  document.body.classList.add('completed');
+  if (skipAnim) return;          // 初次加载已完成 → 不放分镜
+  if (closingArmed) return;       // 防重入
+  closingArmed = true;
+
+  const stage    = document.getElementById('closing-stage');
+  const doneEl   = document.getElementById('closing-done');
+  const totalEl  = document.getElementById('closing-total');
+  const bar      = document.getElementById('closing-bar-fill');
+  const headline = document.getElementById('closing-headline');
+
+  // 起手：bar 在 (done-1)/total，数字显示 done-1
+  totalEl.textContent = total;
+  doneEl.textContent  = done - 1;
+  bar.style.transition = 'none';
+  bar.style.width      = `${((done - 1) / total) * 100}%`;
+  bar.classList.remove('swept');
+  headline.textContent = pickClosingLine();
+
+  // 等 sweep + trail 跑完 1.3s 再进分镜
+  const T = (ms, fn) => closingTimers.push(setTimeout(fn, ms));
+  T(1300, () => {
+    document.body.classList.add('in-closing');
+  });
+  // 进度条 reflow 让 width 落地后再开始动画
+  T(2000, () => {
+    bar.style.transition = '';  // 清 inline transition，让 CSS 1.6s 接管
+    void bar.offsetWidth;        // 强制 reflow 应用上一帧的 transition: none
+    requestAnimationFrame(() => {
+      bar.style.width = `${(done / total) * 100}%`;
+    });
+    // 数字弹一下到 N
+    doneEl.textContent = done;
+    doneEl.classList.add('tick');
+    setTimeout(() => doneEl.classList.remove('tick'), 600);
+  });
+  // bar 完成那一刻扫白光
+  T(3600, () => bar.classList.add('swept'));
+  // 进度条 fade out
+  T(4800, () => document.body.classList.add('stage-fadeout'));
+  // 大字浮现
+  T(5400, () => document.body.classList.add('stage-text'));
+  // 按钮浮现
+  T(6600, () => document.body.classList.add('stage-actions'));
+}
+
+function exitClosingStage(silent) {
+  closingTimers.forEach(t => clearTimeout(t));
+  closingTimers = [];
+  closingArmed  = false;
+  document.body.classList.remove('in-closing', 'stage-fadeout', 'stage-text', 'stage-actions');
+  const bar = document.getElementById('closing-bar-fill');
+  if (bar) { bar.classList.remove('swept'); }
+}
+
+function pickClosingLine() {
+  const lines = ['今天到这里', '一遍 · 听完了', '都说完了'];
+  return lines[Math.floor(Math.random() * lines.length)];
+}
+
+function bindClosingStage() {
+  const back   = document.getElementById('closing-back');
+  const exp    = document.getElementById('closing-export');
+  if (back) back.addEventListener('click', () => exitClosingStage(false));
+  if (exp)  exp.addEventListener('click', async () => {
+    // 生成导出文本
+    exportMarks();
+    const text = document.getElementById('export-text').value;
+    try {
+      await navigator.clipboard.writeText(text);
+      showClosingToast('已复制 · 粘贴给 ai 即可');
+    } catch (e) {
+      // 剪贴板失败：兜底展开 export-area，让用户手动复制
+      exitClosingStage(false);
+      document.getElementById('export-area').scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+}
+
+function showClosingToast(msg) {
+  let toast = document.getElementById('closing-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'closing-toast';
+    toast.className = 'closing-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function bindFilters() {
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+  });
+}
+
+function setFilter(newFilter) {
+  if (newFilter === currentFilter) return;
+  // 先把当前焦点存入当前筛选的记忆
+  if (focusedId) filterFocusMemory[currentFilter] = focusedId;
+  currentFilter = newFilter;
+  // 切换按钮高亮
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === newFilter);
+  });
+  // 恢复焦点：若记忆的 id 在新筛选下仍可见，用记忆位置；否则用新筛选下第一条
+  const memoryId = filterFocusMemory[newFilter];
+  const visibleIds = flatIds.filter(id => filterShowsId(id));
+  if (memoryId && visibleIds.includes(memoryId)) {
+    focusedId = memoryId;
+  } else {
+    focusedId = visibleIds[0] || null;
+  }
+  render();
+  scrollToFocused();
+}
+
+function filterShowsId(id) {
+  if (currentFilter === 'all') return true;
+  if (currentFilter === 'unmarked') return !state[id];
+  return state[id] === currentFilter;
+}
+
+function moveFilter(dir) {
+  const idx = FILTERS.indexOf(currentFilter);
+  const next = FILTERS[(idx + dir + FILTERS.length) % FILTERS.length];
+  setFilter(next);
+}
+
+function bindKeyboard() {
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+    if (MARK_KEYS[e.key]) {
+      e.preventDefault();
+      if (!focusedId) setFocusedSurgical(flatIds[0]);
+      const newMark = setMark(focusedId, MARK_KEYS[e.key]);
+      // 高认同度直接前进；低认同度停留并展示“为什么”，但不进入输入框。
+      if (newMark && !LOW_AGREEMENT_MARKS.has(newMark)) moveFocus(1);
+      return;
+    }
+    if (e.key.toLowerCase() === 'e' && focusedId && state[focusedId]) {
+      e.preventDefault();
+      openNoteWrap(focusedId, true, 'keyboard');
+      return;
+    }
+    if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); moveFocus(1); }
+    else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); moveFocus(-1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'h') { e.preventDefault(); moveFilter(-1); }
+    else if (e.key === 'ArrowRight' || e.key === 'l') { e.preventDefault(); moveFilter(1); }
+    else if (e.key === 'n') { e.preventDefault(); jumpToNextUnmarked(); }
+    else if (e.key === 'Escape') { setFocusedSurgical(null); closeDrawer(); }
+  });
+}
+
+function moveFocus(dir) {
+  // 只在当前筛选可见的 id 中移动
+  const visibleIds = flatIds.filter(id => filterShowsId(id));
+  if (!visibleIds.length) return;
+  let next;
+  if (!focusedId || !visibleIds.includes(focusedId)) {
+    next = visibleIds[0];
+  } else {
+    const idx = visibleIds.indexOf(focusedId);
+    next = visibleIds[Math.max(0, Math.min(visibleIds.length - 1, idx + dir))];
+  }
+  setFocusedSurgical(next, { scroll: true });
+}
+
+function jumpToNextUnmarked() {
+  const startIdx = focusedId ? flatIds.indexOf(focusedId) + 1 : 0;
+  for (let i = startIdx; i < flatIds.length; i++) {
+    if (!state[flatIds[i]]) { setFocusedSurgical(flatIds[i], { scroll: true }); return; }
+  }
+  for (let i = 0; i < startIdx; i++) {
+    if (!state[flatIds[i]]) { setFocusedSurgical(flatIds[i], { scroll: true }); return; }
+  }
+}
+
+function scrollToFocused() {
+  if (!focusedId) return;
+  const el = document.querySelector(`.prop[data-id="${focusedId}"]`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function exportMarks() {
+  const srcId = STORAGE_KEY.replace(/-marks.*$/, '');
+  const groups = data.map(group =>
+    group.items.map(item => {
+      const m = state[item.id] || '⚪';
+      const n = (notes[item.id] || '').trim();
+      return `${item.id}${m}${n ? '[' + n + ']' : ''}`;
+    }).join('')
+  ).join('|');
+  const text = `src:${srcId}\n${groups}`;
+
+  const ta = document.getElementById('export-text');
+  ta.value = text;
+  ta.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(ta.value);
+      showClosingToast('已复制');
+    } catch(e) { ta.select(); }
+  };
+  ta.title = '点击复制';
+  ta.style.cursor = 'pointer';
+
+  document.getElementById('export-area').classList.add('show');
+  setTimeout(() => ta.select(), 100);
+}
+
+function saveUndoSnapshot() {
+  undoState = JSON.parse(JSON.stringify(state));
+  undoNotes = JSON.parse(JSON.stringify(notes));
+}
+
+function showUndoToast(msg) {
+  let toast = document.getElementById('undo-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'undo-toast';
+    toast.className = 'undo-toast';
+    toast.innerHTML = `<span id="undo-msg"></span><button class="undo-toast-btn" onclick="doUndo()">撤销</button>`;
+    document.body.appendChild(toast);
+  }
+  document.getElementById('undo-msg').textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+}
+
+function doUndo() {
+  if (!undoState) return;
+  state = undoState; notes = undoNotes;
+  undoState = null; undoNotes = null;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+  render(); updateStats();
+  const toast = document.getElementById('undo-toast');
+  if (toast) toast.classList.remove('show');
+}
+
+function resetMarks() {
+  if (!confirm('清空所有标注和备注？')) return;
+  saveUndoSnapshot();
+  state = {}; notes = {};
+  flatIds.forEach(id => state[id] = null);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+  render(); updateStats();
+  showUndoToast('已清空 · 5秒内可撤销');
+}
+
+function restoreOriginal() {
+  if (!confirm('还原到 Claude 提供的初始标注？（备注不清除）')) return;
+  saveUndoSnapshot();
+  state = {};
+  // 💡 不作为 initial 值，保险：若 data 里误写了 💡，降级为 ✅
+  data.forEach(g => g.items.forEach(i => {
+    state[i.id] = i.initial === '💡' ? '✅' : i.initial;
+  }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  render(); updateStats();
+  showUndoToast('已还原初始 · 5秒内可撤销');
+}
+
+function toggleDrawer() {
+  const d = document.getElementById('drawer');
+  const b = document.getElementById('drawer-backdrop');
+  const t = document.getElementById('drawer-toggle');
+  const isOpen = d.classList.toggle('open');
+  b.classList.toggle('open', isOpen);
+  t.classList.toggle('active', isOpen);
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-backdrop').classList.remove('open');
+  document.getElementById('drawer-toggle').classList.remove('active');
+}
+
+function toggleKbdHint() {
+  const hint = document.getElementById('kbd-hint');
+  const toggle = document.querySelector('.kbd-toggle');
+  hint.classList.toggle('show');
+  if (hint.classList.contains('show')) {
+    setTimeout(() => hint.classList.remove('show'), 5000);
+  }
+}
+
+function syncThemeToggle() {
+  const button = document.getElementById('theme-toggle');
+  if (!button) return;
+  const dark = document.documentElement.dataset.theme === 'dark';
+  button.textContent = dark ? '☀' : '☾';
+  button.setAttribute('aria-label', dark ? '切换到浅色模式' : '切换到深色模式');
+  button.title = dark ? '切换到浅色模式' : '切换到深色模式';
+}
+
+function toggleTheme() {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('reading-trace-theme', next); } catch (_) {}
+  syncThemeToggle();
+}
+
+syncThemeToggle();
+init();
+</script>
+</body>
+</html>
+

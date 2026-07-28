@@ -29,7 +29,7 @@ description: Turn articles, book excerpts, transcripts, companion-reading notes,
 
 ## 何时改变界面
 
-只有当材料需要现有页面无法表达的认知动作时，才修改 `app/page.tsx` 或 `app/globals.css`。例如多方对话、时间演化、证据与反证、“当时 / 现在”双重判断。先说明新增关系，再设计最小交互；不要只为风格变化增加组件。
+只有当材料需要现有页面无法表达的认知动作时，才修改 `templates/reading-trace.html`。例如多方对话、时间演化、证据与反证、“当时 / 现在”双重判断。先说明新增关系，再设计最小交互；不要只为风格变化增加组件。`public/experience.html` 是自动生成文件，不要直接编辑。
 
 ## 来源与边界
 
