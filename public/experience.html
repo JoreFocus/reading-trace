@@ -11,7 +11,7 @@
   (() => {
     try {
       const saved = localStorage.getItem('reading-trace-theme');
-      const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const theme = saved === 'dark' || saved === 'light' ? saved : 'light';
       document.documentElement.dataset.theme = theme;
     } catch (_) {}
   })();
@@ -2158,4 +2158,3 @@ init();
 </script>
 </body>
 </html>
-

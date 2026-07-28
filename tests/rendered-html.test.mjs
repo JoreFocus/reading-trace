@@ -62,6 +62,11 @@ test("generates the polished interaction from the content file", async () => {
   assert.match(experience, /💡 深刻/);
   assert.match(experience, /closing-stage/);
   assert.match(experience, /reading-trace-theme/);
+  assert.match(
+    experience,
+    /saved === 'dark' \|\| saved === 'light' \? saved : 'light'/,
+  );
+  assert.doesNotMatch(experience, /prefers-color-scheme/);
   assert.match(experience, /localStorage/);
   assert.match(experience, /exportMarks/);
   assert.match(data, /Project Gutenberg/);
