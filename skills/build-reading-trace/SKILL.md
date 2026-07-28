@@ -12,11 +12,12 @@ description: Turn articles, book excerpts, transcripts, companion-reading notes,
 1. 定位 Reading Trace 项目根目录。确认存在 `data/reading.json`、`AGENTS.md` 与 `package.json`。
 2. 完整阅读根目录 `AGENTS.md`。
 3. 阅读用户提供的原文、伴读记录或复盘标注，先区分哪些是来源内容、已有分析和用户自己的判断。
-4. 阅读 `docs/creating-with-agents.md` 与 `docs/build-your-reading-panel.md`。让材料的独特结构决定分组方式。
-5. 需要字段细节或质量检查时，读取 `references/content-contract.md`。
-6. 默认只重写 `data/reading.json`。不要为了生成新内容复制页面组件。
-7. 运行 `npm run validate:content`，再运行 `npm test`。
-8. 向用户说明采用了什么阅读路径、保留了什么来源边界，以及是否存在公开传播风险。
+4. 根据用户平时自然交流时使用的语言，静默确定 `language` 与整套界面语言；没有长期上下文时使用当前对话的主要语言，用户明确指定其他语言时覆盖。不要为了确认语言额外打断用户。
+5. 阅读 `docs/creating-with-agents.md` 与 `docs/build-your-reading-panel.md`。让材料的独特结构决定分组方式。
+6. 需要字段细节或质量检查时，读取 `references/content-contract.md`。目标语言不是中文或英文时，还要读取 `references/ui-localization.md` 并补全 `ui`。
+7. 默认只重写 `data/reading.json`。不要为了生成新内容复制页面组件。
+8. 运行 `npm run validate:content`，再运行 `npm test`。
+9. 向用户说明采用了什么阅读路径、保留了什么来源边界，以及是否存在公开传播风险；无需特意说明语言推断过程。
 
 ## 核心判断
 
@@ -26,6 +27,7 @@ description: Turn articles, book excerpts, transcripts, companion-reading notes,
 - 按矛盾、转折、论证依赖、时间变化或认知运动组织材料，不默认按原文段落切块。
 - 只选择能够生成判断的位置。金句若不能使读者形成判断，就不必收录。
 - 保留材料的词汇、节奏与立场差异，避免把所有内容统一成一种 AI 文风。
+- 标题、内容、结构标签、按钮、提示、追问、确认信息、导出与完成页使用同一种语言。中文和英文有内置界面；其他语言在 `ui` 中提供完整本地化文字，不能只翻译正文而保留中文控件。
 
 ## 何时改变界面
 

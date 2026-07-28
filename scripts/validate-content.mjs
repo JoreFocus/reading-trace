@@ -11,7 +11,7 @@ function nonEmpty(value, path) {
   assert.ok(value.trim(), `${path} must not be empty`);
 }
 
-for (const field of ["id", "title", "summary", "thesis", "invitation"]) {
+for (const field of ["id", "language", "title", "summary", "thesis", "invitation"]) {
   nonEmpty(reading[field], field);
 }
 

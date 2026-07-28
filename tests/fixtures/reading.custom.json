@@ -1,41 +1,42 @@
 {
   "id": "custom-attention-v1",
-  "title": "注意力如何塑造一天",
-  "summary": "一天并不只由做过的事情组成，也由注意力反复停留的位置组成。",
-  "thesis": "注意力去过哪里，我们就在那里生活过。",
-  "invitation": "沿着分心、选择与恢复，留下自己的判断。",
+  "language": "en",
+  "title": "How Attention Shapes a Day",
+  "summary": "A day is shaped not only by what we do, but by where our attention repeatedly rests.",
+  "thesis": "Where attention goes, life is lived.",
+  "invitation": "Follow distraction, choice, and recovery, then leave your own judgment.",
   "source": {
-    "label": "自定义测试语料",
+    "label": "Original English test material",
     "url": "",
     "licenseNote": "Original test fixture."
   },
   "roleLabels": {
-    "core": "核心",
-    "support": "线索",
-    "turn": "转折"
+    "core": "Core",
+    "support": "Clue",
+    "turn": "Turn"
   },
   "groups": [
     {
       "id": "notice",
       "index": "A",
       "kicker": "Notice",
-      "shortTitle": "看见注意力",
-      "title": "分心往往发生在意识到它之前",
-      "description": "先识别注意力如何离开。",
+      "shortTitle": "Notice attention",
+      "title": "Distraction often begins before we notice it",
+      "description": "First notice how attention leaves.",
       "items": [
         {
           "id": "A1",
           "role": "core",
-          "quote": "我们常在很久之后才发现自己已经走神。",
-          "context": "分心不是一次明确决定，而是一连串没有被看见的微小转向。",
-          "prompt": "今天哪一次分心最晚才被你发现？"
+          "quote": "We often notice distraction long after it begins.",
+          "context": "Distraction is rarely one clear decision; it is a series of tiny turns that went unseen.",
+          "prompt": "Which distraction did you notice latest today?"
         },
         {
           "id": "A2",
           "role": "support",
-          "quote": "环境会替我们决定下一眼看向哪里。",
-          "context": "通知、声音和随手可得的入口，会在思考之前争夺下一次注意。",
-          "prompt": "什么东西最常替你决定下一步？"
+          "quote": "The environment can choose where our next glance goes.",
+          "context": "Notifications, sounds, and easy entrances compete for the next moment of attention before thought begins.",
+          "prompt": "What most often chooses your next step for you?"
         }
       ]
     },
@@ -43,23 +44,23 @@
       "id": "choose",
       "index": "B",
       "kicker": "Choose",
-      "shortTitle": "重新选择",
-      "title": "专注不是绷紧，而是一次次回来",
-      "description": "把专注理解为恢复能力。",
+      "shortTitle": "Choose again",
+      "title": "Focus is not tension; it is returning",
+      "description": "Understand focus as the ability to recover.",
       "items": [
         {
           "id": "B1",
           "role": "turn",
-          "quote": "发现偏离，本身就是回来的一部分。",
-          "context": "专注的人并非从不走神，而是更早发现偏离，也更少责备自己。",
-          "prompt": "怎样的提醒能帮助你回来？"
+          "quote": "Noticing the drift is already part of returning.",
+          "context": "Focused people are not free from distraction; they notice it earlier and blame themselves less.",
+          "prompt": "What kind of reminder helps you return?"
         },
         {
           "id": "B2",
           "role": "core",
-          "quote": "真正重要的事情需要被反复选择。",
-          "context": "长期方向不会自动占据一天，它要在许多具体时刻重新获得位置。",
-          "prompt": "今天有什么值得再选择一次？"
+          "quote": "What matters must be chosen repeatedly.",
+          "context": "A long-term direction does not automatically occupy a day; it must regain its place in many concrete moments.",
+          "prompt": "What is worth choosing once more today?"
         }
       ]
     }

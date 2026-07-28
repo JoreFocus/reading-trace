@@ -27,6 +27,7 @@ export type ReadingGroup = {
 
 export type ReadingDocument = {
   id: string;
+  language: string;
   title: string;
   summary: string;
   thesis: string;
@@ -37,5 +38,6 @@ export type ReadingDocument = {
     licenseNote: string;
   };
   roleLabels: Record<ReadingRole, string>;
+  ui?: Record<string, string | string[]>;
   groups: ReadingGroup[];
 };
