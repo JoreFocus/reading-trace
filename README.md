@@ -90,6 +90,7 @@ npm run validate:content
 阅迹诞生于我的 AI 伴读实践。伴读实践受到李继刚先生 [`ljg-read`](https://github.com/lijigang/ljg-skills/tree/master/skills/ljg-read) 的启发，在此致谢。
 
 本项目聚焦阅读界面的呈现问题；界面设计、数据结构、渲染流程与面板设计方法为独立实现。更完整的说明见 [`ACKNOWLEDGEMENTS.md`](ACKNOWLEDGEMENTS.md)。
+原作者对改编与公开再发布的明确授权记录见 [`lijigang/ljg-skills#27`](https://github.com/lijigang/ljg-skills/issues/27)。
 
 《瓦尔登湖》示例原文取自 [Project Gutenberg eBook #205](https://www.gutenberg.org/ebooks/205)，该来源页面将此版本标注为美国公版。
 
