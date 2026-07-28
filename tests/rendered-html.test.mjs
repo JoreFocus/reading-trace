@@ -57,6 +57,7 @@ test("generates the polished interaction from the content file", async () => {
   assert.match(page, /src="\/experience\.html"/);
   assert.match(generator, /data\/reading\.json/);
   assert.match(generator, /templates\/reading-trace\.html/);
+  assert.match(generator, /requires complete ui localization/);
   assert.match(experience, /Where I Lived/);
   assert.match(experience, /Project Gutenberg/);
   assert.match(experience, /💡 深刻/);
@@ -90,11 +91,18 @@ test("keeps the polished renderer when the material is replaced", async () => {
     "utf8",
   );
 
-  assert.match(experience, /注意力如何塑造一天/);
-  assert.match(experience, /自定义测试语料/);
-  assert.match(experience, /分心不是一次明确决定/);
-  assert.match(experience, /💡 深刻/);
+  assert.match(experience, /<html lang="en">/);
+  assert.match(experience, /How Attention Shapes a Day · Reading Trace/);
+  assert.match(experience, /Original English test material/);
+  assert.match(experience, /Distraction is rarely one clear decision/);
+  assert.match(experience, /💡 Deep/);
+  assert.match(experience, /✅ Strong/);
+  assert.match(experience, /Keep editing/);
+  assert.match(experience, /Switch to dark mode/);
   assert.match(experience, /closing-stage/);
   assert.match(experience, /reading-trace-custom-attention-v1-marks-v1/);
-  assert.doesNotMatch(experience, /Where I Lived|Project Gutenberg/);
+  assert.doesNotMatch(
+    experience,
+    /Where I Lived|Project Gutenberg|>💡 深刻<|>返回修改<|aria-label="切换到深色模式"/,
+  );
 });

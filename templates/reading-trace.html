@@ -1266,7 +1266,7 @@ function init() {
   const totalEl = document.getElementById('progress-total');
   if (totalEl) totalEl.textContent = total;
   const metaEl = document.getElementById('meta-count');
-  if (metaEl) metaEl.textContent = `${total} 条命题`;
+  if (metaEl) metaEl.textContent = `${total} ${UI.propositionUnit}`;
 
   buildDrawerNav();
   render();
@@ -1452,7 +1452,7 @@ function render() {
           ${MARKS.map(m => `<div class="mark-btn ${mark === m ? 'selected' : ''}" data-mark="${m}" data-id="${item.id}">${m}</div>`).join('')}
         </div>
         <div class="note-wrap${notes[item.id] ? ' has-note' : ''}" data-id="${item.id}">
-          <button class="note-preview" data-id="${item.id}" title="点击编辑备注">↳ ${escapeHTML(notes[item.id])}</button>
+          <button class="note-preview" data-id="${item.id}" title="${escapeHTML(UI.editNote)}">↳ ${escapeHTML(notes[item.id])}</button>
           <textarea class="note-input" data-id="${item.id}" placeholder="${notePlaceholder(mark)}">${escapeHTML(notes[item.id])}</textarea>
         </div>
       `;
@@ -1531,10 +1531,10 @@ function filterShows(item) {
 const LOW_AGREEMENT_MARKS = new Set(['🟡', '⚪', '❌']);
 
 function notePlaceholder(mark) {
-  if (mark === '🟡') return '哪一部分你不完全认同？（选填）';
-  if (mark === '⚪') return '你暂时保留判断的原因是？（选填）';
-  if (mark === '❌') return '你认为问题出在哪里？（选填）';
-  return '你想补充什么？（选填）';
+  if (mark === '🟡') return UI.partialPrompt;
+  if (mark === '⚪') return UI.holdPrompt;
+  if (mark === '❌') return UI.disagreePrompt;
+  return UI.defaultPrompt;
 }
 
 function syncNotePresentation(id) {
@@ -1843,7 +1843,7 @@ function exitClosingStage(silent) {
 }
 
 function pickClosingLine() {
-  const lines = ['今天到这里', '一遍 · 听完了', '都说完了'];
+  const lines = UI.closingLines;
   return lines[Math.floor(Math.random() * lines.length)];
 }
 
@@ -1857,7 +1857,7 @@ function bindClosingStage() {
     const text = document.getElementById('export-text').value;
     try {
       await navigator.clipboard.writeText(text);
-      showClosingToast('已复制 · 粘贴给 ai 即可');
+      showClosingToast(UI.copiedForAi);
     } catch (e) {
       // 剪贴板失败：兜底展开 export-area，让用户手动复制
       exitClosingStage(false);
@@ -1990,10 +1990,10 @@ function exportMarks() {
   ta.onclick = async () => {
     try {
       await navigator.clipboard.writeText(ta.value);
-      showClosingToast('已复制');
+      showClosingToast(UI.copied);
     } catch(e) { ta.select(); }
   };
-  ta.title = '点击复制';
+  ta.title = UI.clickToCopy;
   ta.style.cursor = 'pointer';
 
   document.getElementById('export-area').classList.add('show');
@@ -2011,7 +2011,7 @@ function showUndoToast(msg) {
     toast = document.createElement('div');
     toast.id = 'undo-toast';
     toast.className = 'undo-toast';
-    toast.innerHTML = `<span id="undo-msg"></span><button class="undo-toast-btn" onclick="doUndo()">撤销</button>`;
+    toast.innerHTML = `<span id="undo-msg"></span><button class="undo-toast-btn" onclick="doUndo()">${escapeHTML(UI.undo)}</button>`;
     document.body.appendChild(toast);
   }
   document.getElementById('undo-msg').textContent = msg;
@@ -2032,18 +2032,18 @@ function doUndo() {
 }
 
 function resetMarks() {
-  if (!confirm('清空所有标注和备注？')) return;
+  if (!confirm(UI.confirmClear)) return;
   saveUndoSnapshot();
   state = {}; notes = {};
   flatIds.forEach(id => state[id] = null);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
   render(); updateStats();
-  showUndoToast('已清空 · 5秒内可撤销');
+  showUndoToast(UI.clearedUndo);
 }
 
 function restoreOriginal() {
-  if (!confirm('还原到 Claude 提供的初始标注？（备注不清除）')) return;
+  if (!confirm(UI.confirmRestore)) return;
   saveUndoSnapshot();
   state = {};
   // 💡 不作为 initial 值，保险：若 data 里误写了 💡，降级为 ✅
@@ -2052,7 +2052,7 @@ function restoreOriginal() {
   }));
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   render(); updateStats();
-  showUndoToast('已还原初始 · 5秒内可撤销');
+  showUndoToast(UI.restoredUndo);
 }
 
 function toggleDrawer() {
@@ -2083,8 +2083,8 @@ function syncThemeToggle() {
   if (!button) return;
   const dark = document.documentElement.dataset.theme === 'dark';
   button.textContent = dark ? '☀' : '☾';
-  button.setAttribute('aria-label', dark ? '切换到浅色模式' : '切换到深色模式');
-  button.title = dark ? '切换到浅色模式' : '切换到深色模式';
+  button.setAttribute('aria-label', dark ? UI.switchToLight : UI.switchToDark);
+  button.title = dark ? UI.switchToLight : UI.switchToDark;
 }
 
 function toggleTheme() {

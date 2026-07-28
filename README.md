@@ -24,6 +24,7 @@
 - 设备本地自动保存；
 - 一键复制紧凑的阅读标注结果；
 - 深浅色模式与完成后的收束分镜；
+- 根据使用者的常用语言生成一致的正文与界面语言；
 - 桌面端与移动端响应式界面。
 
 ## 快速开始
@@ -63,7 +64,7 @@ npm run validate:content
 }
 ```
 
-界面显示 `context` 作为供读者判断的命题，`roleLabels` 作为命题旁的结构标签；`quote` 与 `prompt` 继续保留在数据层，便于 Agent 检查来源边界与提炼逻辑。界面不要求固定使用某种阅读理论；`core / support / turn` 的显示名称可以自行配置。
+根级 `language` 使用 BCP 47 语言标签，例如 `zh-CN`、`en`、`ja`。中文与英文使用内置界面文字；其他语言由 Agent 同时写入 `ui` 本地化字段。界面显示 `context` 作为供读者判断的命题，`roleLabels` 作为命题旁的结构标签；`quote` 与 `prompt` 继续保留在数据层，便于 Agent 检查来源边界与提炼逻辑。界面不要求固定使用某种阅读理论；`core / support / turn` 的显示名称可以自行配置。
 
 ## 与 Codex / Claude Code 一起使用
 
