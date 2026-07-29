@@ -977,15 +977,15 @@
     --line-soft: #312a24;
     --pop: #e47652;
     --yes: #58b889;
-    --yes-soft: rgba(88, 184, 137, 0.2);
+    --yes-soft: rgba(88, 184, 137, 0.08);
     --mid: #d2a449;
-    --mid-soft: rgba(210, 164, 73, 0.2);
+    --mid-soft: rgba(210, 164, 73, 0.08);
     --hold: #9ca6b3;
-    --hold-soft: rgba(156, 166, 179, 0.18);
+    --hold-soft: rgba(156, 166, 179, 0.07);
     --no: #df725e;
-    --no-soft: rgba(223, 114, 94, 0.2);
+    --no-soft: rgba(223, 114, 94, 0.08);
     --deep: #8a82f6;
-    --deep-soft: rgba(138, 130, 246, 0.2);
+    --deep-soft: rgba(138, 130, 246, 0.08);
     --deep-glow: #746bea;
     --yes-glow: #45936d;
     --mid-glow: #ad8134;
@@ -1049,6 +1049,41 @@
       0 1px 0 rgba(255,255,255,0.2) inset,
       0 0 24px rgba(255,255,255,0.05) inset;
   }
+  html[data-theme="dark"] .prop-wrap[data-mark="💡"] .prop-glow { opacity: 0.16; }
+  html[data-theme="dark"] .prop-wrap[data-mark="✅"] .prop-glow,
+  html[data-theme="dark"] .prop-wrap[data-mark="🟡"] .prop-glow,
+  html[data-theme="dark"] .prop-wrap[data-mark="❌"] .prop-glow { opacity: 0.12; }
+  html[data-theme="dark"] .prop-wrap[data-mark="⚪"] .prop-glow { opacity: 0.06; }
+  html[data-theme="dark"] body.completed .prop-wrap[data-mark="💡"] .prop-glow { opacity: 0.2; }
+  html[data-theme="dark"] body.completed .prop-wrap[data-mark="✅"] .prop-glow,
+  html[data-theme="dark"] body.completed .prop-wrap[data-mark="🟡"] .prop-glow,
+  html[data-theme="dark"] body.completed .prop-wrap[data-mark="❌"] .prop-glow { opacity: 0.16; }
+  html[data-theme="dark"] body.completed .prop-wrap[data-mark="⚪"] .prop-glow { opacity: 0.09; }
+  html[data-theme="dark"] .prop-strength {
+    color: #d6c8b8;
+    background: rgba(22, 19, 16, 0.34);
+    border-color: rgba(242, 232, 218, 0.28);
+  }
+  html[data-theme="dark"] .note-preview {
+    color: #d8cbbd;
+    border-left-color: rgba(242, 232, 218, 0.28);
+    opacity: 1;
+  }
+  html[data-theme="dark"] .note-preview:hover {
+    color: var(--ink);
+    border-left-color: var(--pop);
+  }
+  html[data-theme="dark"] .note-input {
+    background: rgba(24, 20, 17, 0.72);
+    color: var(--ink);
+    border-color: rgba(242, 232, 218, 0.24);
+  }
+  html[data-theme="dark"] .note-input:focus {
+    background: rgba(29, 24, 20, 0.9);
+    border-color: rgba(242, 232, 218, 0.42);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.32);
+  }
+  html[data-theme="dark"] .note-input::placeholder { color: #aa9b8d; }
   html[data-theme="dark"] .prop-note,
   html[data-theme="dark"] #export-text {
     background: rgba(31, 26, 22, 0.82);

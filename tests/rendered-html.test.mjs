@@ -68,6 +68,19 @@ test("generates the polished interaction from the content file", async () => {
     /saved === 'dark' \|\| saved === 'light' \? saved : 'light'/,
   );
   assert.doesNotMatch(experience, /prefers-color-scheme/);
+  assert.match(
+    experience,
+    /html\[data-theme="dark"\] \.prop-strength[\s\S]*?color: #d6c8b8/,
+  );
+  assert.match(
+    experience,
+    /html\[data-theme="dark"\] \.note-input[\s\S]*?color: var\(--ink\)/,
+  );
+  assert.match(experience, /--yes-soft: rgba\(88, 184, 137, 0\.08\)/);
+  assert.match(
+    experience,
+    /html\[data-theme="dark"\] \.prop-wrap\[data-mark="✅"\] \.prop-glow,[\s\S]*?opacity: 0\.12/,
+  );
   assert.match(experience, /localStorage/);
   assert.match(experience, /exportMarks/);
   assert.match(data, /Project Gutenberg/);
