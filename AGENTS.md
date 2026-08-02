@@ -4,13 +4,15 @@
 
 ## 默认工作路径
 
-1. 先阅读用户提供的原始材料、伴读记录或复盘标注。
-2. 阅读 `docs/build-your-reading-panel.md`，理解阅迹的设计原则。
-3. 阅读 `docs/creating-with-agents.md`，确定这份材料适合怎样组织。
-4. 从用户长期交流时自然使用的语言判断面板语言，静默写入 `language`；没有长期上下文时使用当前对话的主要语言，用户明确指定时以指定语言为准。内容、界面、提示与导出必须使用同一种语言，不把语言选择变成额外问答。中文与英文之外的语言按 `skills/build-reading-trace/references/ui-localization.md` 补全 `ui`。
-5. 只修改 `data/reading.json` 即可生成新的阅迹；字段契约见 `data/reading.schema.json`。
-6. 运行 `npm run validate:content` 和 `npm test`。
-7. 只有当内容确实要求新的交互关系时，才修改 `templates/reading-trace.html`。`app/page.tsx` 只是默认入口，不承载阅迹设计。
+1. 先阅读 `HANDOFF.md`，确认当前状态、已知问题和下一步。
+2. 阅读用户提供的原始材料、伴读记录或复盘标注。
+3. 阅读 `docs/build-your-reading-panel.md`，理解阅迹的设计原则。
+4. 阅读 `docs/creating-with-agents.md`，确定这份材料适合怎样组织。
+5. 从用户长期交流时自然使用的语言判断面板语言，静默写入 `language`；没有长期上下文时使用当前对话的主要语言，用户明确指定时以指定语言为准。内容、界面、提示与导出必须使用同一种语言，不把语言选择变成额外问答。中文与英文之外的语言按 `skills/build-reading-trace/references/ui-localization.md` 补全 `ui`。
+6. 只修改 `data/reading.json` 即可生成新的阅迹；字段契约见 `data/reading.schema.json`。
+7. 运行 `npm run validate:content` 和 `npm test`。
+8. 只有当内容确实要求新的交互关系时，才修改 `templates/reading-trace.html`。`app/page.tsx` 只是默认入口，不承载阅迹设计。
+9. 阶段性工作结束时，更新 `HANDOFF.md`，写清已完成内容、已知问题和下一步；在测试通过后保留一个可恢复的 Git 检查点。
 
 ## 三层信息不得混淆
 
