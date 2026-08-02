@@ -10,7 +10,7 @@ description: Turn articles, book excerpts, transcripts, companion-reading notes,
 ## 工作路径
 
 1. 定位 Reading Trace 项目根目录。确认存在 `data/reading.json`、`AGENTS.md` 与 `package.json`。
-2. 完整阅读根目录 `AGENTS.md`。
+2. 完整阅读根目录 `AGENTS.md` 与 `HANDOFF.md`。
 3. 阅读用户提供的原文、伴读记录或复盘标注，先区分哪些是来源内容、已有分析和用户自己的判断。
 4. 根据用户平时自然交流时使用的语言，静默确定 `language` 与整套界面语言；没有长期上下文时使用当前对话的主要语言，用户明确指定其他语言时覆盖。不要为了确认语言额外打断用户。
 5. 阅读 `docs/creating-with-agents.md` 与 `docs/build-your-reading-panel.md`。让材料的独特结构决定分组方式。
@@ -18,6 +18,7 @@ description: Turn articles, book excerpts, transcripts, companion-reading notes,
 7. 默认只重写 `data/reading.json`。不要为了生成新内容复制页面组件。
 8. 运行 `npm run validate:content`，再运行 `npm test`。
 9. 向用户说明采用了什么阅读路径、保留了什么来源边界，以及是否存在公开传播风险；无需特意说明语言推断过程。
+10. 阶段性工作结束时更新 `HANDOFF.md`，使下一次对话能在不依赖旧上下文的情况下继续。
 
 ## 核心判断
 
@@ -46,3 +47,4 @@ description: Turn articles, book excerpts, transcripts, companion-reading notes,
 - 每个阅读位置都值得一次真实判断。
 - 作品仍然保留这份材料自身的声音。
 - 来源、授权和公开范围已被明确处理。
+- `HANDOFF.md` 与实际项目状态一致，已留下可恢复的 Git 检查点。
